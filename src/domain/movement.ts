@@ -26,10 +26,19 @@ function isMovementType(value: unknown): value is MovementType {
 }
 
 function quantityIssues(type: MovementType, quantity: number): string[] {
-  if (type === 'AJUSTE') return [];
+  if (type === 'AJUSTE') {
+    return Number.isSafeInteger(quantity) && quantity >= 0
+      ? []
+      : ['No ajuste, o novo saldo deve ser um número inteiro maior ou igual a zero.'];
+  }
   return Number.isSafeInteger(quantity) && quantity > 0
     ? []
     : ['Quantidade deve ser um número inteiro maior que zero.'];
+}
+
+function reasonIssues(type: MovementType, reason: string | undefined): string[] {
+  if (type !== 'AJUSTE') return [];
+  return (reason ?? '').trim().length > 0 ? [] : ['Ajuste de inventário exige um motivo.'];
 }
 
 /** Retorna a lista de problemas dos dados da movimentação (vazia quando válidos). */
@@ -40,7 +49,11 @@ export function validateMovementData(data: MovementData): string[] {
     issues.push(`Tipo deve ser um de: ${MOVEMENT_TYPES.join(', ')}.`);
     return issues;
   }
-  return [...issues, ...quantityIssues(data.type, data.quantity)];
+  return [
+    ...issues,
+    ...quantityIssues(data.type, data.quantity),
+    ...reasonIssues(data.type, data.reason),
+  ];
 }
 
 /** Cria uma movimentação validada, ou lança InvalidMovementError. */

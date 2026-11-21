@@ -68,3 +68,36 @@ describe('validação de tipo e produto', () => {
     expect(validateMovementData(data({ productId: ' ' }))).toEqual(['Produto é obrigatório.']);
   });
 });
+
+describe('validação de ajuste de inventário', () => {
+  const ajuste = (overrides: Partial<MovementData> = {}) =>
+    data({ type: 'AJUSTE', quantity: 7, reason: 'Contagem de inventário', ...overrides });
+
+  it('deve aceitar ajuste com novo saldo e motivo', () => {
+    expect(validateMovementData(ajuste())).toEqual([]);
+  });
+
+  it('deve aceitar ajuste que zera o saldo', () => {
+    expect(validateMovementData(ajuste({ quantity: 0 }))).toEqual([]);
+  });
+
+  it('deve rejeitar ajuste para saldo negativo', () => {
+    expect(validateMovementData(ajuste({ quantity: -1 }))).toHaveLength(1);
+  });
+
+  it('deve rejeitar ajuste para saldo fracionário', () => {
+    expect(validateMovementData(ajuste({ quantity: 2.5 }))).toHaveLength(1);
+  });
+
+  it('deve exigir motivo no ajuste', () => {
+    const semMotivo = data({ type: 'AJUSTE', quantity: 7 });
+
+    expect(validateMovementData(semMotivo)).toEqual(['Ajuste de inventário exige um motivo.']);
+  });
+
+  it('deve rejeitar ajuste com motivo composto apenas de espaços', () => {
+    expect(validateMovementData(ajuste({ reason: '   ' }))).toEqual([
+      'Ajuste de inventário exige um motivo.',
+    ]);
+  });
+});
