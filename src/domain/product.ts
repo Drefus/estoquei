@@ -28,6 +28,7 @@ export interface CreationMeta {
 }
 
 export const SKU_PATTERN = /^[A-Z0-9-]{3,20}$/;
+export const NAME_MAX_LENGTH = 100;
 
 function skuIssues(sku: string): string[] {
   return SKU_PATTERN.test(sku)
@@ -35,9 +36,18 @@ function skuIssues(sku: string): string[] {
     : ['SKU deve ter de 3 a 20 caracteres, usando apenas letras maiúsculas, números e hífen.'];
 }
 
+function nameIssues(name: string): string[] {
+  const trimmed = name.trim();
+  if (trimmed.length === 0) return ['Nome é obrigatório.'];
+  if (trimmed.length > NAME_MAX_LENGTH) {
+    return [`Nome deve ter no máximo ${NAME_MAX_LENGTH} caracteres.`];
+  }
+  return [];
+}
+
 /** Retorna a lista de problemas dos dados do produto (vazia quando válidos). */
 export function validateProductData(data: ProductData): string[] {
-  return [...skuIssues(data.sku)];
+  return [...skuIssues(data.sku), ...nameIssues(data.name)];
 }
 
 /** Cria um produto ativo e com saldo zero, ou lança InvalidProductError. */

@@ -51,3 +51,27 @@ describe('validação de SKU', () => {
     },
   );
 });
+
+describe('validação de nome', () => {
+  it('deve rejeitar nome vazio', () => {
+    expect(validateProductData(validProductData({ name: '' }))).toEqual(['Nome é obrigatório.']);
+  });
+
+  it('deve rejeitar nome composto apenas de espaços', () => {
+    expect(validateProductData(validProductData({ name: '   ' }))).toEqual(['Nome é obrigatório.']);
+  });
+
+  it('deve aceitar nome com exatamente 100 caracteres', () => {
+    expect(validateProductData(validProductData({ name: 'a'.repeat(100) }))).toEqual([]);
+  });
+
+  it('deve rejeitar nome com mais de 100 caracteres', () => {
+    expect(validateProductData(validProductData({ name: 'a'.repeat(101) }))).toHaveLength(1);
+  });
+
+  it('deve remover espaços nas pontas do nome ao criar o produto', () => {
+    const product = createProduct(validProductData({ name: '  Café  ' }), meta);
+
+    expect(product.name).toBe('Café');
+  });
+});
