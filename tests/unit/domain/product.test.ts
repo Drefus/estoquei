@@ -75,3 +75,21 @@ describe('validação de nome', () => {
     expect(product.name).toBe('Café');
   });
 });
+
+describe('validação de preço de custo', () => {
+  it('deve aceitar preço de custo zero', () => {
+    expect(validateProductData(validProductData({ costCents: 0 }))).toEqual([]);
+  });
+
+  it('deve rejeitar preço de custo negativo', () => {
+    expect(validateProductData(validProductData({ costCents: -1 }))).toHaveLength(1);
+  });
+
+  it('deve rejeitar preço de custo com fração de centavo', () => {
+    expect(validateProductData(validProductData({ costCents: 19.99 }))).toHaveLength(1);
+  });
+
+  it('deve rejeitar preço de custo que não é um número', () => {
+    expect(validateProductData(validProductData({ costCents: Number.NaN }))).toHaveLength(1);
+  });
+});

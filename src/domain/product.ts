@@ -45,9 +45,15 @@ function nameIssues(name: string): string[] {
   return [];
 }
 
+function costIssues(costCents: number): string[] {
+  return Number.isSafeInteger(costCents) && costCents >= 0
+    ? []
+    : ['Preço de custo deve ser um valor inteiro em centavos maior ou igual a zero.'];
+}
+
 /** Retorna a lista de problemas dos dados do produto (vazia quando válidos). */
 export function validateProductData(data: ProductData): string[] {
-  return [...skuIssues(data.sku), ...nameIssues(data.name)];
+  return [...skuIssues(data.sku), ...nameIssues(data.name), ...costIssues(data.costCents)];
 }
 
 /** Cria um produto ativo e com saldo zero, ou lança InvalidProductError. */
