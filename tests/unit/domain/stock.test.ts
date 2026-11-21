@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { InvalidMovementError } from '../../../src/domain/errors.js';
+import { InsufficientStockError, InvalidMovementError } from '../../../src/domain/errors.js';
 import { applyMovement } from '../../../src/domain/stock.js';
 import { aMovement, aProduct } from './builders.js';
 
@@ -56,6 +56,32 @@ describe('applyMovement', () => {
 
     expect(() => applyMovement(product, aMovement({ quantity: 0.5 }))).toThrow(
       InvalidMovementError,
+    );
+  });
+});
+
+describe('applyMovement com saldo insuficiente', () => {
+  it('deve impedir saída maior que o saldo disponível', () => {
+    const product = aProduct({ quantity: 3 });
+
+    expect(() => applyMovement(product, aMovement({ type: 'SAIDA', quantity: 4 }))).toThrow(
+      InsufficientStockError,
+    );
+  });
+
+  it('deve permitir saída que deixa o saldo exatamente zero', () => {
+    const product = aProduct({ quantity: 3 });
+
+    const updated = applyMovement(product, aMovement({ type: 'SAIDA', quantity: 3 }));
+
+    expect(updated.quantity).toBe(0);
+  });
+
+  it('deve impedir qualquer saída quando o saldo é zero', () => {
+    const product = aProduct({ quantity: 0 });
+
+    expect(() => applyMovement(product, aMovement({ type: 'SAIDA', quantity: 1 }))).toThrow(
+      InsufficientStockError,
     );
   });
 });

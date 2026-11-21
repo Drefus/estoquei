@@ -1,4 +1,4 @@
-import { InvalidMovementError } from './errors.js';
+import { InsufficientStockError, InvalidMovementError } from './errors.js';
 import { validateMovementData, type Movement } from './movement.js';
 import type { Product } from './product.js';
 
@@ -23,6 +23,9 @@ export function applyMovement(product: Product, movement: Movement): Product {
   }
   const issues = validateMovementData(movement);
   if (issues.length > 0) throw new InvalidMovementError(issues);
+  if (movement.type === 'SAIDA' && movement.quantity > product.quantity) {
+    throw new InsufficientStockError(product.quantity, movement.quantity);
+  }
 
   return { ...product, quantity: nextQuantity(product.quantity, movement) };
 }
