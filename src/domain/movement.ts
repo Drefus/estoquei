@@ -58,15 +58,15 @@ export function validateMovementData(data: MovementData): string[] {
 
 /** Cria uma movimentação validada, ou lança InvalidMovementError. */
 export function createMovement(data: MovementData, meta: CreationMeta): Movement {
-  const normalized: MovementData = { ...data, reason: (data.reason ?? '').trim() };
-  const issues = validateMovementData(normalized);
+  const reason = (data.reason ?? '').trim();
+  const issues = validateMovementData({ ...data, reason });
   if (issues.length > 0) throw new InvalidMovementError(issues);
   return {
     id: meta.id,
-    productId: normalized.productId,
-    type: normalized.type,
-    quantity: normalized.quantity,
-    reason: normalized.reason ?? '',
+    productId: data.productId,
+    type: data.type,
+    quantity: data.quantity,
+    reason,
     date: meta.now,
   };
 }
