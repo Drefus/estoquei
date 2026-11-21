@@ -1,6 +1,6 @@
 # Prateleira
 
-[![CI](https://github.com/Drefus/tp-es2-estoquei/actions/workflows/ci.yml/badge.svg)](https://github.com/Drefus/tp-es2-estoquei/actions/workflows/ci.yml)
+[![CI](https://github.com/Drefus/estoquei/actions/workflows/ci.yml/badge.svg)](https://github.com/Drefus/estoquei/actions/workflows/ci.yml)
 
 Controle de estoque simples desenvolvido para a disciplina de Engenharia de Software 2.
 
