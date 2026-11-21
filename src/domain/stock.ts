@@ -1,4 +1,4 @@
-import { InsufficientStockError, InvalidMovementError } from './errors.js';
+import { InactiveProductError, InsufficientStockError, InvalidMovementError } from './errors.js';
 import { validateMovementData, type Movement } from './movement.js';
 import type { Product } from './product.js';
 
@@ -21,6 +21,7 @@ export function applyMovement(product: Product, movement: Movement): Product {
   if (movement.productId !== product.id) {
     throw new InvalidMovementError(['A movimentação pertence a outro produto.']);
   }
+  if (!product.active) throw new InactiveProductError(product.id);
   const issues = validateMovementData(movement);
   if (issues.length > 0) throw new InvalidMovementError(issues);
   if (movement.type === 'SAIDA' && movement.quantity > product.quantity) {

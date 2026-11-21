@@ -1,5 +1,9 @@
 import { describe, expect, it } from 'vitest';
-import { InsufficientStockError, InvalidMovementError } from '../../../src/domain/errors.js';
+import {
+  InactiveProductError,
+  InsufficientStockError,
+  InvalidMovementError,
+} from '../../../src/domain/errors.js';
 import { applyMovement } from '../../../src/domain/stock.js';
 import { aMovement, aProduct } from './builders.js';
 
@@ -83,5 +87,17 @@ describe('applyMovement com saldo insuficiente', () => {
     expect(() => applyMovement(product, aMovement({ type: 'SAIDA', quantity: 1 }))).toThrow(
       InsufficientStockError,
     );
+  });
+});
+
+describe('applyMovement em produto inativo', () => {
+  it.each([
+    aMovement({ type: 'ENTRADA', quantity: 1 }),
+    aMovement({ type: 'SAIDA', quantity: 1 }),
+    aMovement({ type: 'AJUSTE', quantity: 1, reason: 'Inventário' }),
+  ])('deve impedir movimentação do tipo $type em produto inativo', (movement) => {
+    const product = aProduct({ active: false, quantity: 10 });
+
+    expect(() => applyMovement(product, movement)).toThrow(InactiveProductError);
   });
 });
