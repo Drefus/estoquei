@@ -51,9 +51,20 @@ function costIssues(costCents: number): string[] {
     : ['Preço de custo deve ser um valor inteiro em centavos maior ou igual a zero.'];
 }
 
+function minStockIssues(minStock: number): string[] {
+  return Number.isSafeInteger(minStock) && minStock >= 0
+    ? []
+    : ['Estoque mínimo deve ser um número inteiro maior ou igual a zero.'];
+}
+
 /** Retorna a lista de problemas dos dados do produto (vazia quando válidos). */
 export function validateProductData(data: ProductData): string[] {
-  return [...skuIssues(data.sku), ...nameIssues(data.name), ...costIssues(data.costCents)];
+  return [
+    ...skuIssues(data.sku),
+    ...nameIssues(data.name),
+    ...costIssues(data.costCents),
+    ...minStockIssues(data.minStock),
+  ];
 }
 
 /** Cria um produto ativo e com saldo zero, ou lança InvalidProductError. */

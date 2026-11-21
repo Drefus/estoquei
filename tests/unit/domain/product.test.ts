@@ -93,3 +93,31 @@ describe('validação de preço de custo', () => {
     expect(validateProductData(validProductData({ costCents: Number.NaN }))).toHaveLength(1);
   });
 });
+
+describe('validação de estoque mínimo', () => {
+  it('deve aceitar estoque mínimo zero', () => {
+    expect(validateProductData(validProductData({ minStock: 0 }))).toEqual([]);
+  });
+
+  it('deve rejeitar estoque mínimo negativo', () => {
+    expect(validateProductData(validProductData({ minStock: -1 }))).toHaveLength(1);
+  });
+
+  it('deve rejeitar estoque mínimo fracionário', () => {
+    expect(validateProductData(validProductData({ minStock: 2.5 }))).toHaveLength(1);
+  });
+});
+
+describe('validação combinada', () => {
+  it('deve reportar todos os problemas de uma vez', () => {
+    const issues = validateProductData({
+      sku: 'x',
+      name: '',
+      category: 'Mercearia',
+      costCents: -1,
+      minStock: -1,
+    });
+
+    expect(issues).toHaveLength(4);
+  });
+});
