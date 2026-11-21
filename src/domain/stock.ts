@@ -30,3 +30,8 @@ export function applyMovement(product: Product, movement: Movement): Product {
 
   return { ...product, quantity: nextQuantity(product.quantity, movement) };
 }
+
+/** Indica se o saldo do produto está igual ou abaixo do estoque mínimo. */
+export function isLowStock(product: Pick<Product, 'quantity' | 'minStock'>): boolean {
+  return product.quantity <= product.minStock;
+}

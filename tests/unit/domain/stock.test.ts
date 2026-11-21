@@ -4,7 +4,7 @@ import {
   InsufficientStockError,
   InvalidMovementError,
 } from '../../../src/domain/errors.js';
-import { applyMovement } from '../../../src/domain/stock.js';
+import { applyMovement, isLowStock } from '../../../src/domain/stock.js';
 import { aMovement, aProduct } from './builders.js';
 
 describe('applyMovement', () => {
@@ -99,5 +99,23 @@ describe('applyMovement em produto inativo', () => {
     const product = aProduct({ active: false, quantity: 10 });
 
     expect(() => applyMovement(product, movement)).toThrow(InactiveProductError);
+  });
+});
+
+describe('isLowStock', () => {
+  it('deve indicar estoque baixo quando o saldo está abaixo do mínimo', () => {
+    expect(isLowStock(aProduct({ quantity: 2, minStock: 5 }))).toBe(true);
+  });
+
+  it('deve indicar estoque baixo quando o saldo é igual ao mínimo', () => {
+    expect(isLowStock(aProduct({ quantity: 5, minStock: 5 }))).toBe(true);
+  });
+
+  it('não deve indicar estoque baixo quando o saldo está acima do mínimo', () => {
+    expect(isLowStock(aProduct({ quantity: 6, minStock: 5 }))).toBe(false);
+  });
+
+  it('deve indicar estoque baixo quando saldo e mínimo são zero', () => {
+    expect(isLowStock(aProduct({ quantity: 0, minStock: 0 }))).toBe(true);
   });
 });
