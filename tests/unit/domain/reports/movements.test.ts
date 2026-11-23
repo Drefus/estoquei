@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { movementSummary } from '../../../../src/domain/reports/movements.js';
+import { movementSummary, topMovedProducts } from '../../../../src/domain/reports/movements.js';
 import { aMovement } from '../builders.js';
 
 const start = new Date('2026-01-15T00:00:00.000Z');
@@ -140,5 +140,90 @@ describe('movementSummary', () => {
     movementSummary(movements, start, end);
 
     expect({ movements, start, end }).toEqual(original);
+  });
+});
+
+describe('topMovedProducts', () => {
+  it('deve retornar lista vazia quando não existem movimentações', () => {
+    expect(topMovedProducts([], 5)).toEqual([]);
+  });
+
+  it('deve somar as quantidades de saída de um mesmo produto', () => {
+    const movements = [
+      aMovement({ id: 'saida-1', type: 'SAIDA', quantity: 2 }),
+      aMovement({ id: 'saida-2', type: 'SAIDA', quantity: 3 }),
+    ];
+
+    expect(topMovedProducts(movements, 5)).toEqual([{ productId: 'prod-1', quantity: 5 }]);
+  });
+
+  it('deve desconsiderar entradas e ajustes no ranking de saídas', () => {
+    const movements = [
+      aMovement({ productId: 'somente-entrada', type: 'ENTRADA', quantity: 100 }),
+      aMovement({
+        id: 'ajuste',
+        productId: 'somente-ajuste',
+        type: 'AJUSTE',
+        quantity: 200,
+        reason: 'Inventário',
+      }),
+      aMovement({ id: 'saida', productId: 'com-saida', type: 'SAIDA', quantity: 2 }),
+    ];
+
+    expect(topMovedProducts(movements, 5)).toEqual([{ productId: 'com-saida', quantity: 2 }]);
+  });
+
+  it('deve ordenar por unidades retiradas em vez do número de movimentações', () => {
+    const movements = [
+      aMovement({ id: 'a-1', productId: 'produto-a', type: 'SAIDA', quantity: 1 }),
+      aMovement({ id: 'a-2', productId: 'produto-a', type: 'SAIDA', quantity: 1 }),
+      aMovement({ id: 'b-1', productId: 'produto-b', type: 'SAIDA', quantity: 5 }),
+    ];
+
+    expect(topMovedProducts(movements, 5)).toEqual([
+      { productId: 'produto-b', quantity: 5 },
+      { productId: 'produto-a', quantity: 2 },
+    ]);
+  });
+
+  it('deve restringir o resultado à quantidade de produtos solicitada', () => {
+    const movements = [
+      aMovement({ productId: 'produto-a', type: 'SAIDA', quantity: 1 }),
+      aMovement({ id: 'b', productId: 'produto-b', type: 'SAIDA', quantity: 5 }),
+    ];
+
+    expect(topMovedProducts(movements, 1)).toEqual([{ productId: 'produto-b', quantity: 5 }]);
+  });
+
+  it('deve desempatar produtos com a mesma quantidade pelo id', () => {
+    const movements = [
+      aMovement({ productId: 'produto-z', type: 'SAIDA', quantity: 3 }),
+      aMovement({ id: 'a', productId: 'produto-a', type: 'SAIDA', quantity: 3 }),
+    ];
+
+    expect(topMovedProducts(movements, 5)).toEqual([
+      { productId: 'produto-a', quantity: 3 },
+      { productId: 'produto-z', quantity: 3 },
+    ]);
+  });
+
+  it('deve retornar lista vazia quando o limite é zero', () => {
+    expect(topMovedProducts([aMovement({ type: 'SAIDA' })], 0)).toEqual([]);
+  });
+
+  it.each([-1, 1.5, Number.NaN])('deve rejeitar limite inválido: %s', (limit) => {
+    expect(() => topMovedProducts([], limit)).toThrow(RangeError);
+  });
+
+  it('deve preservar a ordem e os dados das movimentações recebidas', () => {
+    const movements = Object.freeze([
+      aMovement({ id: 'z', productId: 'produto-z', type: 'SAIDA', quantity: 1 }),
+      aMovement({ id: 'a', productId: 'produto-a', type: 'SAIDA', quantity: 5 }),
+    ]);
+    const original = structuredClone(movements);
+
+    topMovedProducts(movements, 5);
+
+    expect(movements).toEqual(original);
   });
 });

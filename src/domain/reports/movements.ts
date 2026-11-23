@@ -14,6 +14,11 @@ export interface MovementSummary {
   daily: DailyMovementSummary[];
 }
 
+export interface TopMovedProduct {
+  productId: string;
+  quantity: number;
+}
+
 /**
  * Resume entradas e saídas em dias UTC inclusivos, preenchendo dias sem movimento.
  * O saldo diário é entradas menos saídas, não o estoque acumulado.
@@ -59,4 +64,31 @@ export function movementSummary(
   }
 
   return { totalEntries, totalExits, daily };
+}
+
+/**
+ * Ordena pela quantidade total de saídas, com desempate pelo id do produto.
+ * Quem chama fornece as movimentações já filtradas para o período desejado.
+ */
+export function topMovedProducts(movements: readonly Movement[], limit: number): TopMovedProduct[] {
+  if (!Number.isSafeInteger(limit) || limit < 0) {
+    throw new RangeError('O limite deve ser um número inteiro maior ou igual a zero.');
+  }
+
+  const quantities = new Map<string, number>();
+  for (const movement of movements) {
+    if (movement.type !== 'SAIDA') continue;
+    quantities.set(
+      movement.productId,
+      (quantities.get(movement.productId) ?? 0) + movement.quantity,
+    );
+  }
+
+  return [...quantities]
+    .map(([productId, quantity]) => ({ productId, quantity }))
+    .sort(
+      (left, right) =>
+        right.quantity - left.quantity || left.productId.localeCompare(right.productId, 'en'),
+    )
+    .slice(0, limit);
 }
