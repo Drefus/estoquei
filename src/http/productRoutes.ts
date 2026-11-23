@@ -1,6 +1,7 @@
 import { Router } from 'express';
 import type { InventoryService } from '../services/inventoryService.js';
 import { parseProductBody, parseProductFilters, parseProductId } from './validation.js';
+import { movementRoutes } from './movementRoutes.js';
 
 export function productRoutes(inventory: InventoryService): Router {
   const router = Router();
@@ -19,5 +20,6 @@ export function productRoutes(inventory: InventoryService): Router {
     await inventory.deactivateProduct(parseProductId(req.params.id));
     res.status(204).end();
   });
+  router.use('/:id/movements', movementRoutes(inventory));
   return router;
 }
