@@ -1,8 +1,9 @@
 # Fase 3: repositórios em memória e relatórios
 
 Esta etapa implementa os contratos de persistência, os adaptadores em memória e
-os quatro relatórios de domínio. A ligação com `InventoryService`, as rotas e o
-PostgreSQL será feita nas próximas etapas.
+os quatro relatórios de domínio. A integração com `InventoryService` e as rotas
+está descrita em [API e serviço de estoque](api.md). O adaptador PostgreSQL ainda
+precisa ser implementado.
 
 ## Produtos
 
@@ -106,11 +107,11 @@ configurado no computador ou no CI.
 
 ## Continuação da implementação
 
-1. Implementar os adaptadores PostgreSQL respeitando os mesmos contratos e filtros.
+1. Implementar os adaptadores PostgreSQL respeitando os mesmos contratos e filtros, incluindo o contrato transacional `InventoryStore`.
 2. Criar a migração com SKU único e vínculo entre movimentação e produto.
-3. Integrar os repositórios ao serviço e à escolha de armazenamento no servidor.
-4. Garantir que registro de movimentação e atualização do saldo sejam atômicos, inclusive em saídas concorrentes.
-5. Consumir os relatórios nas rotas, no painel e na exportação CSV.
+3. Conectar esse adaptador à seleção de armazenamento no servidor. Por enquanto, `STORAGE=postgres` sem um serviço injetado interrompe a inicialização.
+4. Reproduzir no banco as garantias de atomicidade e concorrência já testadas em memória.
+5. Consumir a API implementada nas páginas do sistema.
 
 Para executar as verificações locais, consulte a seção
 [Execução dos testes](../README.md#execução-dos-testes) do README.
