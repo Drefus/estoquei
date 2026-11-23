@@ -6,6 +6,13 @@ import type { ProductFilters, ProductRepository } from './productRepository.js';
 export class InMemoryProductRepository implements ProductRepository {
   private readonly products = new Map<string, Product>();
 
+  /** Cria um estado independente para uma transação em memória. */
+  clone(): InMemoryProductRepository {
+    const copy = new InMemoryProductRepository();
+    for (const [id, product] of this.products) copy.products.set(id, structuredClone(product));
+    return copy;
+  }
+
   async save(product: Product): Promise<void> {
     if (this.products.has(product.id)) {
       throw new Error(`Produto ${product.id} já cadastrado.`);

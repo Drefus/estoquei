@@ -5,6 +5,13 @@ import type { MovementRepository } from './movementRepository.js';
 export class InMemoryMovementRepository implements MovementRepository {
   private readonly movements = new Map<string, Movement>();
 
+  /** Cria um estado independente para uma transação em memória. */
+  clone(): InMemoryMovementRepository {
+    const copy = new InMemoryMovementRepository();
+    for (const [id, movement] of this.movements) copy.movements.set(id, structuredClone(movement));
+    return copy;
+  }
+
   async save(movement: Movement): Promise<void> {
     if (this.movements.has(movement.id)) {
       throw new Error(`Movimentação ${movement.id} já cadastrada.`);
