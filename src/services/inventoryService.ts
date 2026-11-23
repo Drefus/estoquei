@@ -7,6 +7,8 @@ import {
   type ProductData,
 } from '../domain/product.js';
 import type { InventoryStore } from '../repositories/inventoryStore.js';
+import { createMovement, type Movement, type MovementType } from '../domain/movement.js';
+import { applyMovement } from '../domain/stock.js';
 import type { ProductRepository } from '../repositories/productRepository.js';
 
 export interface InventoryServiceDeps {
@@ -52,6 +54,25 @@ export class InventoryService {
     await this.deps.store.transaction(async ({ products }) => {
       const current = await this.requireProduct(products, id);
       await products.update({ ...current, active: false });
+    });
+  }
+
+  async registerMovement(
+    productId: string,
+    type: MovementType,
+    quantity: number,
+    reason = '',
+  ): Promise<{ product: Product; movement: Movement }> {
+    return this.deps.store.transaction(async ({ products, movements }) => {
+      const product = await this.requireProduct(products, productId);
+      const movement = createMovement(
+        { productId, type, quantity, reason },
+        { id: this.createId(), now: this.clock() },
+      );
+      const updated = applyMovement(product, movement);
+      await products.update(updated);
+      await movements.save(movement);
+      return { product: updated, movement };
     });
   }
 
