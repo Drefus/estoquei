@@ -1,5 +1,5 @@
 import { randomUUID } from 'node:crypto';
-import { DuplicateSkuError } from '../domain/errors.js';
+import { DuplicateSkuError, InvalidProductError, ProductNotFoundError } from '../domain/errors.js';
 import {
   createProduct as createProductValue,
   type CreationMeta,
@@ -7,6 +7,7 @@ import {
   type ProductData,
 } from '../domain/product.js';
 import type { InventoryStore } from '../repositories/inventoryStore.js';
+import type { ProductRepository } from '../repositories/productRepository.js';
 
 export interface InventoryServiceDeps {
   store: InventoryStore;
@@ -30,6 +31,34 @@ export class InventoryService {
       await products.save(product);
       return product;
     });
+  }
+
+  async updateProduct(id: string, data: ProductData): Promise<Product> {
+    if ('quantity' in data) {
+      throw new InvalidProductError(['O saldo só pode ser alterado por movimentações.']);
+    }
+    return this.deps.store.transaction(async ({ products }) => {
+      const current = await this.requireProduct(products, id);
+      const validated = this.validatedProduct(data, { id: current.id, now: current.createdAt });
+      const duplicate = await products.findBySku(validated.sku);
+      if (duplicate && duplicate.id !== id) throw new DuplicateSkuError(validated.sku);
+      const updated = { ...validated, quantity: current.quantity, active: current.active };
+      await products.update(updated);
+      return updated;
+    });
+  }
+
+  async deactivateProduct(id: string): Promise<void> {
+    await this.deps.store.transaction(async ({ products }) => {
+      const current = await this.requireProduct(products, id);
+      await products.update({ ...current, active: false });
+    });
+  }
+
+  private async requireProduct(products: ProductRepository, id: string): Promise<Product> {
+    const product = await products.findById(id);
+    if (!product) throw new ProductNotFoundError(id);
+    return product;
   }
 
   private validatedProduct(data: ProductData, meta: CreationMeta): Product {

@@ -1,5 +1,9 @@
 import { describe, expect, it } from 'vitest';
-import { DuplicateSkuError, InvalidProductError } from '../../../src/domain/errors.js';
+import {
+  DuplicateSkuError,
+  InvalidProductError,
+  ProductNotFoundError,
+} from '../../../src/domain/errors.js';
 import { createTestInventory, TEST_NOW } from '../../inventoryHelpers.js';
 import { validProductData } from '../domain/builders.js';
 
@@ -65,5 +69,109 @@ describe('InventoryService.createProduct', () => {
     const product = await inventory.createProduct(input);
 
     expect(product).toMatchObject({ id: 'id-1', quantity: 0, active: true });
+  });
+});
+
+describe('InventoryService.updateProduct', () => {
+  it('deve editar os dados do produto preservando saldo, identidade e data de cadastro', async () => {
+    const { store, inventory } = createTestInventory();
+    const original = await inventory.createProduct(validProductData());
+    await store.transaction(async ({ products }) => products.update({ ...original, quantity: 7 }));
+
+    const updated = await inventory.updateProduct(
+      original.id,
+      validProductData({ name: '  Café especial  ', costCents: 2500 }),
+    );
+
+    expect(updated).toEqual({ ...original, name: 'Café especial', costCents: 2500, quantity: 7 });
+    expect(await store.repositories.products.findById(original.id)).toEqual(updated);
+  });
+
+  it('deve rejeitar tentativa de alterar o saldo diretamente', async () => {
+    const { store, inventory } = createTestInventory();
+    const original = await inventory.createProduct(validProductData());
+    const input = { ...validProductData(), quantity: 99 };
+
+    await expect(inventory.updateProduct(original.id, input)).rejects.toThrow(InvalidProductError);
+    expect(await store.repositories.products.findById(original.id)).toEqual(original);
+  });
+
+  it('deve preservar o cadastro quando os novos dados são inválidos', async () => {
+    const { store, inventory } = createTestInventory();
+    const original = await inventory.createProduct(validProductData());
+
+    await expect(
+      inventory.updateProduct(original.id, validProductData({ costCents: -1 })),
+    ).rejects.toThrow(InvalidProductError);
+    expect(await store.repositories.products.findById(original.id)).toEqual(original);
+  });
+
+  it('deve rejeitar edição de produto inexistente', async () => {
+    const { inventory } = createTestInventory();
+
+    await expect(inventory.updateProduct('ausente', validProductData())).rejects.toThrow(
+      ProductNotFoundError,
+    );
+  });
+
+  it('deve impedir edição para o SKU de outro produto', async () => {
+    const { store, inventory } = createTestInventory();
+    await inventory.createProduct(validProductData());
+    const second = await inventory.createProduct(validProductData({ sku: 'SEG-001' }));
+
+    await expect(inventory.updateProduct(second.id, validProductData())).rejects.toThrow(
+      DuplicateSkuError,
+    );
+    expect(await store.repositories.products.findById(second.id)).toEqual(second);
+  });
+
+  it('deve permitir trocar o SKU por outro ainda disponível', async () => {
+    const { store, inventory } = createTestInventory();
+    const original = await inventory.createProduct(validProductData());
+
+    await inventory.updateProduct(original.id, validProductData({ sku: 'NOV-001' }));
+
+    expect(await store.repositories.products.findBySku(original.sku)).toBeNull();
+    expect((await store.repositories.products.findBySku('NOV-001'))?.id).toBe(original.id);
+  });
+
+  it('deve preservar a situação inativa ao editar os dados do produto', async () => {
+    const { inventory } = createTestInventory();
+    const original = await inventory.createProduct(validProductData());
+    await inventory.deactivateProduct(original.id);
+
+    expect(
+      (await inventory.updateProduct(original.id, validProductData({ name: 'Novo nome' }))).active,
+    ).toBe(false);
+  });
+});
+
+describe('InventoryService.deactivateProduct', () => {
+  it('deve desativar o produto mantendo o cadastro armazenado', async () => {
+    const { store, inventory } = createTestInventory();
+    const product = await inventory.createProduct(validProductData());
+
+    await inventory.deactivateProduct(product.id);
+
+    expect(await store.repositories.products.findById(product.id)).toEqual({
+      ...product,
+      active: false,
+    });
+  });
+
+  it('deve rejeitar desativação de produto inexistente', async () => {
+    const { inventory } = createTestInventory();
+
+    await expect(inventory.deactivateProduct('ausente')).rejects.toThrow(ProductNotFoundError);
+  });
+
+  it('deve permitir repetir a desativação de um produto', async () => {
+    const { store, inventory } = createTestInventory();
+    const product = await inventory.createProduct(validProductData());
+
+    await inventory.deactivateProduct(product.id);
+    await inventory.deactivateProduct(product.id);
+
+    expect((await store.repositories.products.findById(product.id))?.active).toBe(false);
   });
 });
