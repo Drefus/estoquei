@@ -22,4 +22,44 @@ Controle de estoque simples desenvolvido para a disciplina de Engenharia de Soft
 
 ## Execução dos testes
 
-<!-- Descrever como rodar testes de unidade, cobertura e e2e. -->
+Com Node.js e npm instalados, execute na raiz do repositório:
+
+```sh
+npm ci
+npm test
+npm run test:coverage
+```
+
+`npm test` executa os testes de unidade em `tests/unit` e os testes HTTP em
+`tests/http`. Os testes usam armazenamento em memória, configurado pelos scripts
+com `cross-env`. O CI está configurado para executar os testes e a cobertura em
+Windows, macOS e Linux.
+
+A cobertura deve atingir pelo menos 80% em linhas, funções, ramificações e
+instruções. O relatório HTML fica em `coverage/index.html`, e o resumo em
+`coverage/coverage-summary.json`.
+
+Para verificar também estilo, tipos e compilação:
+
+```sh
+npm run lint
+npm run format:check
+npm run typecheck
+npm run build
+```
+
+Para os testes do Playwright:
+
+```sh
+npx playwright install chromium
+npm run test:e2e
+```
+
+O Playwright inicia seu próprio servidor em memória. Por enquanto, sua suíte
+contém um teste HTTP de disponibilidade em `/health`; os fluxos de interface
+serão acrescentados com as páginas do sistema.
+
+## Desenvolvimento
+
+Os contratos dos repositórios em memória, as regras dos relatórios e os pontos
+de integração das próximas etapas estão em [Fase 3](docs/fase-3.md).
