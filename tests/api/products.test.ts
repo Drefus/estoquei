@@ -48,7 +48,7 @@ describe('cadastro e listagem de produtos pela API', () => {
     const { app } = createApiFixture();
     const response = await request(app)
       .post('/api/products')
-      .send(validProductData({ name: null as unknown as string }));
+      .send({ ...validProductData(), name: null });
     expect(response.status).toBe(400);
     expect(response.body.error.code).toBe('INVALID_REQUEST');
   });
