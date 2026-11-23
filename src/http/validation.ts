@@ -88,3 +88,25 @@ export function parseProductId(value: unknown): string {
   }
   return value.trim();
 }
+
+function dateField(query: Record<string, unknown>, field: string): Date {
+  const value = stringField(query, field);
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(value)) {
+    throw new RequestValidationError([`${field} deve usar o formato YYYY-MM-DD.`]);
+  }
+  const date = new Date(`${value}T00:00:00.000Z`);
+  if (!Number.isFinite(date.getTime()) || date.toISOString().slice(0, 10) !== value) {
+    throw new RequestValidationError([`${field} deve ser uma data válida.`]);
+  }
+  return date;
+}
+
+export function parsePeriodQuery(query: Record<string, unknown>): { start: Date; end: Date } {
+  allowedFields(query, ['inicio', 'fim']);
+  const start = dateField(query, 'inicio');
+  const end = dateField(query, 'fim');
+  if (start.getTime() > end.getTime()) {
+    throw new RequestValidationError(['O início do período não pode ser posterior ao fim.']);
+  }
+  return { start, end };
+}

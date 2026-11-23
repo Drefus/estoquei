@@ -39,14 +39,12 @@ export const errorHandler: ErrorRequestHandler = (error: unknown, _req, res, nex
     return;
   }
   if (error instanceof Error && 'type' in error && error.type === 'entity.too.large') {
-    res
-      .status(413)
-      .json({
-        error: {
-          code: 'PAYLOAD_TOO_LARGE',
-          message: 'O corpo da requisição excede o limite permitido.',
-        },
-      });
+    res.status(413).json({
+      error: {
+        code: 'PAYLOAD_TOO_LARGE',
+        message: 'O corpo da requisição excede o limite permitido.',
+      },
+    });
     return;
   }
   res.status(500).json({ error: { code: 'INTERNAL_ERROR', message: 'Erro interno do servidor.' } });

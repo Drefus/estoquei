@@ -4,6 +4,7 @@ import { healthRoutes } from './http/healthRoutes.js';
 import { errorHandler } from './http/errorHandler.js';
 import { productRoutes } from './http/productRoutes.js';
 import { dashboardRoutes } from './http/dashboardRoutes.js';
+import { reportRoutes } from './http/reportRoutes.js';
 import { InventoryService } from './services/inventoryService.js';
 import { InMemoryInventoryStore } from './repositories/inMemoryInventoryStore.js';
 
@@ -24,6 +25,7 @@ export function createApp(deps: AppDeps): Express {
   app.use(healthRoutes());
   app.use('/api/products', productRoutes(inventory));
   app.use('/api/dashboard', dashboardRoutes(inventory));
+  app.use('/api/reports', reportRoutes(inventory));
   app.use((_req, res) => {
     res.status(404).json({ error: { code: 'NOT_FOUND', message: 'Rota não encontrada.' } });
   });
