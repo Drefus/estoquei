@@ -9,12 +9,22 @@ import {
 import type { InventoryStore } from '../repositories/inventoryStore.js';
 import { createMovement, type Movement, type MovementType } from '../domain/movement.js';
 import { applyMovement } from '../domain/stock.js';
-import type { ProductRepository } from '../repositories/productRepository.js';
+import type { ProductFilters, ProductRepository } from '../repositories/productRepository.js';
+import { lowStockList, totalStockValue } from '../domain/reports/stock.js';
+import { movementSummary, type MovementSummary } from '../domain/reports/movements.js';
 
 export interface InventoryServiceDeps {
   store: InventoryStore;
   clock?: () => Date;
   createId?: () => string;
+}
+
+export interface Dashboard {
+  stockValueCents: number;
+  activeProductCount: number;
+  lowStockCount: number;
+  lowStockProducts: Product[];
+  movementSummary: MovementSummary;
 }
 
 export class InventoryService {
@@ -74,6 +84,44 @@ export class InventoryService {
       await movements.save(movement);
       return { product: updated, movement };
     });
+  }
+
+  async listProducts(filters: ProductFilters = {}): Promise<Product[]> {
+    return this.deps.store.repositories.products.list(filters);
+  }
+
+  async getProductHistory(id: string): Promise<{ product: Product; movements: Movement[] }> {
+    const repositories = this.deps.store.repositories;
+    const product = await this.requireProduct(repositories.products, id);
+    const movements = await repositories.movements.listByProduct(id);
+    movements.sort(
+      (left, right) =>
+        right.date.getTime() - left.date.getTime() || left.id.localeCompare(right.id, 'en'),
+    );
+    return { product, movements };
+  }
+
+  async listMovementsByPeriod(start: Date, end: Date): Promise<Movement[]> {
+    return this.deps.store.repositories.movements.listByPeriod(start, end);
+  }
+
+  async getDashboard(): Promise<Dashboard> {
+    const end = this.clock();
+    const start = new Date(end.getTime());
+    start.setUTCDate(start.getUTCDate() - 6);
+    const repositories = this.deps.store.repositories;
+    const [products, movements] = await Promise.all([
+      repositories.products.list({ activeOnly: true }),
+      repositories.movements.listByPeriod(start, end),
+    ]);
+    const lowStockProducts = lowStockList(products);
+    return {
+      stockValueCents: totalStockValue(products),
+      activeProductCount: products.length,
+      lowStockCount: lowStockProducts.length,
+      lowStockProducts,
+      movementSummary: movementSummary(movements, start, end),
+    };
   }
 
   private async requireProduct(products: ProductRepository, id: string): Promise<Product> {
