@@ -37,6 +37,10 @@ jobs:
       - name: Testes com cobertura
         run: npm run test:coverage
 
+      - name: Resumo da cobertura na página da execução
+        if: matrix.os == 'ubuntu-latest' && always() && hashFiles('coverage/coverage-summary.json') != ''
+        run: node scripts/coverage-summary.mjs >> "$GITHUB_STEP_SUMMARY"
+
       - name: Publicar relatório de cobertura
         if: matrix.os == 'ubuntu-latest' && always()
         uses: actions/upload-artifact@v4
