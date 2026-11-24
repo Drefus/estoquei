@@ -15,7 +15,7 @@ export interface AppDeps {
 
 export function createApp(deps: AppDeps): Express {
   if (!deps.inventory && deps.config.storage === 'postgres') {
-    throw new Error('STORAGE=postgres exige um InventoryService com PostgresInventoryStore.');
+    throw new Error('STORAGE=postgres exige um InventoryService conectado ao PostgreSQL.');
   }
   const inventory = deps.inventory ?? new InventoryService({ store: new InMemoryInventoryStore() });
   const app = express();
