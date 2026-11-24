@@ -1,0 +1,115 @@
+<%- include('../partials/header', { title }) %>
+<%
+  const low = product.active && isLowStock(product);
+  const typeLabels = { ENTRADA: 'Entrada', SAIDA: 'Saída', AJUSTE: 'Ajuste' };
+  const typeBadges = { ENTRADA: 'badge-in', SAIDA: 'badge-out', AJUSTE: 'badge-muted' };
+  const notices = {
+    cadastrado: 'Produto cadastrado.',
+    salvo: 'Alterações salvas.',
+    movimentado: 'Movimentação registrada.',
+  };
+%>
+<div class="page-header">
+  <h1><%= product.name %></h1>
+  <div class="actions">
+    <a class="button button-secondary" href="/produtos/<%= encodeURIComponent(product.id) %>/editar">Editar</a>
+    <a class="button button-secondary" href="/produtos">Voltar à lista</a>
+  </div>
+</div>
+
+<% if (notices[notice]) { %>
+  <p class="alert alert-success" role="status" data-testid="success-message"><%= notices[notice] %></p>
+<% } %>
+
+<section class="panel" aria-labelledby="titulo-dados">
+  <h2 id="titulo-dados">Dados do produto</h2>
+  <dl class="details">
+    <div><dt>SKU</dt><dd data-testid="product-detail-sku"><%= product.sku %></dd></div>
+    <div><dt>Categoria</dt><dd><%= product.category || '—' %></dd></div>
+    <div><dt>Preço de custo</dt><dd><%= formatCents(product.costCents) %></dd></div>
+    <div><dt>Estoque mínimo</dt><dd><%= product.minStock %></dd></div>
+    <div>
+      <dt>Saldo atual</dt>
+      <dd class="stock-value" data-testid="product-quantity"><%= product.quantity %></dd>
+    </div>
+    <div>
+      <dt>Situação</dt>
+      <dd>
+        <% if (!product.active) { %>
+          <span class="badge badge-muted" data-testid="inactive-badge">Inativo</span>
+        <% } else if (low) { %>
+          <span class="badge badge-warning" data-testid="low-stock-badge">Estoque baixo</span>
+        <% } else { %>
+          <span class="badge badge-in">Ativo</span>
+        <% } %>
+      </dd>
+    </div>
+  </dl>
+</section>
+
+<section class="panel" id="movimentar" aria-labelledby="titulo-movimentar">
+  <h2 id="titulo-movimentar">Registrar movimentação</h2>
+  <% if (!product.active) { %>
+    <p class="muted">Produto inativo não aceita movimentações.</p>
+  <% } else { %>
+    <% if (movementError) { %>
+      <div class="alert alert-error" role="alert" data-testid="error-message"><%= movementError %></div>
+    <% } %>
+    <form method="post" action="/produtos/<%= encodeURIComponent(product.id) %>/movimentacoes" novalidate data-testid="movement-form">
+      <div class="form-grid">
+        <div class="field">
+          <label for="mov-tipo">Tipo</label>
+          <select id="mov-tipo" name="type" data-testid="movement-type">
+            <option value="ENTRADA" <%= movement.type === 'ENTRADA' ? 'selected' : '' %>>Entrada</option>
+            <option value="SAIDA" <%= movement.type === 'SAIDA' ? 'selected' : '' %>>Saída</option>
+            <option value="AJUSTE" <%= movement.type === 'AJUSTE' ? 'selected' : '' %>>Ajuste de inventário</option>
+          </select>
+        </div>
+        <div class="field">
+          <label for="mov-quantidade">Quantidade</label>
+          <input id="mov-quantidade" name="quantity" type="text" inputmode="numeric" required value="<%= movement.quantity %>" aria-describedby="mov-quantidade-dica" data-testid="movement-quantity" />
+          <span class="hint" id="mov-quantidade-dica">No ajuste, informe o novo saldo contado.</span>
+        </div>
+        <div class="field">
+          <label for="mov-motivo">Motivo</label>
+          <input id="mov-motivo" name="reason" type="text" maxlength="200" value="<%= movement.reason %>" aria-describedby="mov-motivo-dica" data-testid="movement-reason" />
+          <span class="hint" id="mov-motivo-dica">Obrigatório no ajuste.</span>
+        </div>
+      </div>
+      <div class="form-actions">
+        <button type="submit" data-testid="movement-submit">Registrar</button>
+      </div>
+    </form>
+  <% } %>
+</section>
+
+<section class="panel" aria-labelledby="titulo-historico">
+  <h2 id="titulo-historico">Histórico de movimentações</h2>
+  <% if (movements.length === 0) { %>
+    <p class="muted" data-testid="empty-history">Nenhuma movimentação registrada.</p>
+  <% } else { %>
+    <div class="table-wrap">
+      <table data-testid="movement-history">
+        <thead>
+          <tr>
+            <th scope="col">Data</th>
+            <th scope="col">Tipo</th>
+            <th scope="col" class="number">Quantidade</th>
+            <th scope="col">Motivo</th>
+          </tr>
+        </thead>
+        <tbody>
+          <% for (const item of movements) { %>
+            <tr data-testid="movement-row">
+              <td><%= formatDateTime(item.date) %></td>
+              <td><span class="badge <%= typeBadges[item.type] %>"><%= typeLabels[item.type] %></span></td>
+              <td class="number"><%= item.type === 'AJUSTE' ? `saldo → ${item.quantity}` : item.quantity %></td>
+              <td><%= item.reason || '—' %></td>
+            </tr>
+          <% } %>
+        </tbody>
+      </table>
+    </div>
+  <% } %>
+</section>
+<%- include('../partials/footer') %>
