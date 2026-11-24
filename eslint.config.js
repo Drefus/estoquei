@@ -17,5 +17,13 @@ export default tseslint.config(
       eqeqeq: ['error', 'always'],
     },
   },
+  {
+    // Scripts servidos ao navegador, sem etapa de build.
+    files: ['src/public/**/*.js'],
+    languageOptions: {
+      sourceType: 'script',
+      globals: { ...globals.browser },
+    },
+  },
   prettier,
 );

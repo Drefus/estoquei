@@ -1,0 +1,71 @@
+<%- include('partials/header', { title }) %>
+<% const summary = dashboard.movementSummary; %>
+<h1>Painel</h1>
+
+<section class="cards" aria-label="Indicadores do estoque">
+  <article class="card" data-testid="total-value-card">
+    <p class="card-label">Valor total do estoque</p>
+    <p class="card-value" data-testid="total-value"><%= formatCents(dashboard.stockValueCents) %></p>
+  </article>
+  <article class="card" data-testid="active-products-card">
+    <p class="card-label">Produtos ativos</p>
+    <p class="card-value" data-testid="active-products"><%= dashboard.activeProductCount %></p>
+  </article>
+  <article class="card <%= dashboard.lowStockCount > 0 ? 'card-warning' : '' %>" data-testid="low-stock-card">
+    <p class="card-label">Itens com estoque baixo</p>
+    <p class="card-value" data-testid="low-stock-count"><%= dashboard.lowStockCount %></p>
+  </article>
+</section>
+
+<section class="panel" aria-labelledby="titulo-grafico">
+  <h2 id="titulo-grafico">Entradas e saídas nos últimos 7 dias</h2>
+  <p class="muted">
+    Total no período: <strong data-testid="period-entries"><%= summary.totalEntries %></strong> em entradas e
+    <strong data-testid="period-exits"><%= summary.totalExits %></strong> em saídas.
+  </p>
+  <div class="chart-box">
+    <canvas
+      id="grafico-movimentacoes"
+      role="img"
+      aria-label="Gráfico de barras: <%= summary.totalEntries %> unidades em entradas e <%= summary.totalExits %> em saídas nos últimos 7 dias"
+      data-testid="movement-chart"
+    ></canvas>
+  </div>
+  <script type="application/json" id="dados-grafico"><%- chartJson %></script>
+</section>
+
+<section class="panel" aria-labelledby="titulo-estoque-baixo">
+  <h2 id="titulo-estoque-baixo">Estoque baixo</h2>
+  <% if (dashboard.lowStockProducts.length === 0) { %>
+    <p class="muted" data-testid="no-low-stock">Nenhum produto ativo está com estoque baixo.</p>
+  <% } else { %>
+    <div class="table-wrap">
+      <table data-testid="low-stock-table">
+        <thead>
+          <tr>
+            <th scope="col">SKU</th>
+            <th scope="col">Produto</th>
+            <th scope="col" class="number">Saldo</th>
+            <th scope="col" class="number">Mínimo</th>
+            <th scope="col" class="number">Déficit</th>
+          </tr>
+        </thead>
+        <tbody>
+          <% for (const product of dashboard.lowStockProducts) { %>
+            <tr class="low-stock" data-testid="low-stock-row" data-sku="<%= product.sku %>">
+              <td><%= product.sku %></td>
+              <td><a href="/produtos/<%= encodeURIComponent(product.id) %>"><%= product.name %></a></td>
+              <td class="number"><%= product.quantity %></td>
+              <td class="number"><%= product.minStock %></td>
+              <td class="number"><span class="badge badge-warning"><%= product.minStock - product.quantity %></span></td>
+            </tr>
+          <% } %>
+        </tbody>
+      </table>
+    </div>
+  <% } %>
+</section>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js" defer></script>
+<script src="/js/dashboard-chart.js" defer></script>
+<%- include('partials/footer') %>

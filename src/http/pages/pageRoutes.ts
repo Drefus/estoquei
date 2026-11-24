@@ -1,6 +1,7 @@
 import { Router, type ErrorRequestHandler, type RequestHandler } from 'express';
 import { ProductNotFoundError } from '../../domain/errors.js';
 import type { InventoryService } from '../../services/inventoryService.js';
+import { dashboardPage } from './dashboardPage.js';
 import { productPages } from './productPages.js';
 
 /** Responde 404 com página amigável, ou JSON para rotas da API. */
@@ -22,6 +23,7 @@ const productNotFoundPage: ErrorRequestHandler = (error, _req, res, next) => {
 
 export function pageRoutes(inventory: InventoryService): Router {
   const router = Router();
+  router.use(dashboardPage(inventory));
   router.use(productPages(inventory));
   router.use(productNotFoundPage);
   return router;
