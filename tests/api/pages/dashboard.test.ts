@@ -60,3 +60,29 @@ describe('página do painel', () => {
     expect(response.type).toMatch(/javascript/);
   });
 });
+
+describe('exportação CSV pelo painel', () => {
+  it('deve sugerir os últimos 7 dias como período do CSV', async () => {
+    const { app } = createApiFixture();
+
+    const response = await request(app).get('/');
+
+    expect(response.text).toContain('action="/api/reports/movements.csv"');
+    expect(response.text).toMatch(/name="inicio"[^>]*value="2026-01-15"/);
+    expect(response.text).toMatch(/name="fim"[^>]*value="2026-01-21"/);
+  });
+
+  it('deve baixar o CSV com os campos enviados pelo formulário', async () => {
+    const { app, inventory } = createApiFixture();
+    const product = await inventory.createProduct(validProductData());
+    await inventory.registerMovement(product.id, 'ENTRADA', 4);
+
+    const response = await request(app)
+      .get('/api/reports/movements.csv')
+      .query({ inicio: '2026-01-15', fim: '2026-01-21' });
+
+    expect(response.status).toBe(200);
+    expect(response.headers['content-disposition']).toContain('attachment');
+    expect(response.text).toContain('ENTRADA');
+  });
+});

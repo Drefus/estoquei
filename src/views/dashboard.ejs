@@ -34,6 +34,23 @@
   <script type="application/json" id="dados-grafico"><%- chartJson %></script>
 </section>
 
+<section class="panel" aria-labelledby="titulo-csv">
+  <h2 id="titulo-csv">Exportar movimentações</h2>
+  <form class="filters" method="get" action="/api/reports/movements.csv" data-testid="csv-form">
+    <div class="field">
+      <label for="csv-inicio">Início</label>
+      <input id="csv-inicio" name="inicio" type="date" required value="<%= period.start %>" data-testid="csv-start" />
+    </div>
+    <div class="field">
+      <label for="csv-fim">Fim</label>
+      <input id="csv-fim" name="fim" type="date" required value="<%= period.end %>" data-testid="csv-end" />
+    </div>
+    <div class="actions">
+      <button type="submit" data-testid="csv-download">Baixar CSV</button>
+    </div>
+  </form>
+</section>
+
 <section class="panel" aria-labelledby="titulo-estoque-baixo">
   <h2 id="titulo-estoque-baixo">Estoque baixo</h2>
   <% if (dashboard.lowStockProducts.length === 0) { %>
