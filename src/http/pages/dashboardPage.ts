@@ -18,6 +18,12 @@ export function dailyChartData(summary: MovementSummary): DailyChartData {
   };
 }
 
+/** Período sugerido para o CSV: do primeiro ao último dia do resumo (vazio se não houver dias). */
+export function summaryPeriod(summary: MovementSummary): { start: string; end: string } {
+  const days = summary.daily;
+  return { start: days[0]?.date ?? '', end: days.at(-1)?.date ?? '' };
+}
+
 /** Serializa JSON para dentro de <script> sem permitir o fechamento da tag. */
 export function jsonForScript(value: unknown): string {
   return JSON.stringify(value).replace(/</g, '\\u003c');
@@ -27,13 +33,12 @@ export function dashboardPage(inventory: InventoryService): Router {
   const router = Router();
   router.get('/', async (_req, res) => {
     const dashboard = await inventory.getDashboard();
-    const days = dashboard.movementSummary.daily;
     res.render('dashboard', {
       title: 'Painel',
       nav: 'painel',
       dashboard,
       chartJson: jsonForScript(dailyChartData(dashboard.movementSummary)),
-      period: { start: days[0]?.date ?? '', end: days.at(-1)?.date ?? '' },
+      period: summaryPeriod(dashboard.movementSummary),
     });
   });
   return router;
