@@ -2,8 +2,8 @@
 
 Esta etapa implementa os contratos de persistência, os adaptadores em memória e
 os quatro relatórios de domínio. A integração com `InventoryService` e as rotas
-está descrita em [API e serviço de estoque](api.md). O adaptador PostgreSQL ainda
-precisa ser implementado.
+está descrita em [API e serviço de estoque](api.md). O adaptador PostgreSQL está
+descrito em [PostgreSQL](#postgresql).
 
 ## Produtos
 
@@ -105,13 +105,47 @@ alterar as datas recebidas. Datas inválidas ou período invertido causam
 `RangeError`. A interpretação em UTC mantém o resultado independente do fuso
 configurado no computador ou no CI.
 
-## Continuação da implementação
+## PostgreSQL
 
-1. Implementar os adaptadores PostgreSQL respeitando os mesmos contratos e filtros, incluindo o contrato transacional `InventoryStore`.
-2. Criar a migração com SKU único e vínculo entre movimentação e produto.
-3. Conectar esse adaptador à seleção de armazenamento no servidor. Por enquanto, `STORAGE=postgres` sem um serviço injetado interrompe a inicialização.
-4. Reproduzir no banco as garantias de atomicidade e concorrência já testadas em memória.
-5. Consumir a API implementada nas páginas do sistema.
+Com `STORAGE=postgres` e `DATABASE_URL` definidas, `src/server.ts` monta o
+`InventoryService` sobre `PostgresInventoryStore` (em `src/repositories/postgres`).
+Os adaptadores seguem os mesmos contratos e filtros dos repositórios em memória:
+
+- `DuplicateSkuError` vem da violação do índice único `products_sku_key`.
+- A busca usa `strpos` em minúsculas, então `%` e `_` digitados não viram curingas.
+- `listByPeriod` usa os mesmos dias completos em UTC de `getUtcDayPeriod`.
+- `transaction` abre uma transação dedicada e obtém um `pg_advisory_xact_lock`,
+  serializando as escritas como o armazenamento em memória. Assim, duas saídas
+  simultâneas não leem o mesmo saldo. Qualquer erro faz `ROLLBACK`.
+
+### Migrações
+
+Os arquivos `db/migrations/NNN_nome.sql` são aplicados em ordem pelo nome, cada
+um em sua transação, e registrados na tabela `schema_migrations`. Rodar de novo
+não reaplica nada. O script usa o código compilado:
+
+```sh
+npm run build
+DATABASE_URL=postgres://... npm run db:migrate
+```
+
+### Testes de integração
+
+Os testes em `tests/postgres` rodam somente com `TEST_DATABASE_URL` definida,
+porque apagam os dados das tabelas. Sem ela, aparecem como ignorados. Para rodar
+com um Postgres temporário em Docker:
+
+```sh
+docker run -d --rm --name prateleira-pg -e POSTGRES_PASSWORD=teste -p 55432:5432 postgres:16-alpine
+TEST_DATABASE_URL=postgres://postgres:teste@localhost:55432/postgres npx vitest run tests/postgres
+docker stop prateleira-pg
+```
+
+No Windows (PowerShell), defina a variável antes com
+`$env:TEST_DATABASE_URL = "postgres://postgres:teste@localhost:55432/postgres"`.
+
+Os adaptadores e o executor de migrações ficam fora da cobertura (ver
+`vitest.config.ts`), pois o CI usa apenas `STORAGE=memory`.
 
 Para executar as verificações locais, consulte a seção
 [Execução dos testes](../README.md#execução-dos-testes) do README.

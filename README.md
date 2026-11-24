@@ -17,7 +17,8 @@ indicadores de estoque e exportação CSV.
 A API HTTP e o armazenamento em memória estão implementados. As escritas são
 transacionais: uma falha desfaz alterações de saldo e histórico, e movimentações
 simultâneas são serializadas. O armazenamento em memória é reiniciado junto com
-o servidor. A persistência PostgreSQL e as páginas EJS são as próximas etapas.
+o servidor. Com `STORAGE=postgres`, os dados ficam no PostgreSQL (veja
+[PostgreSQL](docs/fase-3.md#postgresql)).
 
 Para iniciar a API local:
 
@@ -38,7 +39,8 @@ O servidor usa a porta 3000 por padrão. Consulte `GET /health`,
 - **Supertest:** testes de integração da API por requisições HTTP.
 - **Playwright:** teste atual de disponibilidade e base para os futuros fluxos de interface.
 - **GitHub Actions:** lint, formatação, build e testes com cobertura em Linux, macOS e Windows.
-- **EJS e PostgreSQL com pg:** dependências previstas para as próximas etapas de interface e persistência.
+- **PostgreSQL com pg:** persistência em produção, com migrações SQL versionadas.
+- **EJS:** dependência prevista para as páginas do sistema.
 
 ## Uso de IA
 
@@ -100,6 +102,5 @@ de integração das próximas etapas estão em [Fase 3](docs/fase-3.md).
 A composição dos serviços, os endpoints e os exemplos de requisições estão em
 [API e serviço de estoque](docs/api.md).
 
-Para concluir a entrega, faltam os adaptadores PostgreSQL e migrações, as páginas
-EJS, pelo menos cinco fluxos e2e de interface executados no CI, a publicação em
+Para concluir a entrega, faltam as páginas EJS, pelo menos cinco fluxos e2e de interface executados no CI, a publicação em
 produção, os nomes completos dos integrantes e o vídeo de apresentação.
