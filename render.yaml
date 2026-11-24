@@ -1,0 +1,20 @@
+# Blueprint do Render: serviço web gratuito com o banco PostgreSQL no Neon.
+# A DATABASE_URL não fica no repositório; é informada no painel do Render.
+services:
+  - type: web
+    name: prateleira
+    runtime: node
+    plan: free
+    buildCommand: npm ci && npm run build
+    # As migrações rodam a cada início e só aplicam o que ainda falta.
+    # O db:seed NÃO roda aqui; é executado manualmente quando necessário.
+    startCommand: npm run db:migrate && npm start
+    healthCheckPath: /health
+    autoDeploy: true
+    envVars:
+      - key: NODE_VERSION
+        value: '20'
+      - key: STORAGE
+        value: postgres
+      - key: DATABASE_URL
+        sync: false
