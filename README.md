@@ -20,16 +20,30 @@ simultâneas são serializadas. O armazenamento em memória é reiniciado junto 
 o servidor. Com `STORAGE=postgres`, os dados ficam no PostgreSQL (veja
 [PostgreSQL](docs/fase-3.md#postgresql)).
 
-Para iniciar a API local:
+### Páginas
+
+- **Painel (`/`):** valor total do estoque, produtos ativos, itens com estoque
+  baixo, gráfico de entradas e saídas dos últimos 7 dias, tabela de estoque
+  baixo e download do CSV de movimentações de um período.
+- **Produtos (`/produtos`):** busca por nome ou SKU, filtro por categoria e
+  "somente estoque baixo", com ações de editar, movimentar e desativar.
+- **Cadastro e edição (`/produtos/novo`, `/produtos/:id/editar`):** preço
+  digitado em reais e mensagem de erro abaixo de cada campo inválido.
+- **Produto (`/produtos/:id`):** dados, saldo, registro de entrada, saída ou
+  ajuste e histórico de movimentações.
+
+As páginas são renderizadas no servidor com EJS e enviam formulários HTML comuns.
+O único JavaScript no navegador desenha o gráfico; as regras ficam no servidor.
+
+Para iniciar o sistema localmente:
 
 ```sh
 npm ci
 npm run dev
 ```
 
-O servidor usa a porta 3000 por padrão. Consulte `GET /health`,
-`GET /api/products` e os demais endpoints descritos na
-[documentação da API](docs/api.md).
+Acesse `http://localhost:3000`. A API JSON (`/api/products`, `/api/dashboard`
+e outros) está descrita na [documentação da API](docs/api.md).
 
 ## Tecnologias
 
@@ -40,7 +54,8 @@ O servidor usa a porta 3000 por padrão. Consulte `GET /health`,
 - **Playwright:** teste atual de disponibilidade e base para os futuros fluxos de interface.
 - **GitHub Actions:** lint, formatação, build e testes com cobertura em Linux, macOS e Windows.
 - **PostgreSQL com pg:** persistência em produção, com migrações SQL versionadas.
-- **EJS:** dependência prevista para as páginas do sistema.
+- **EJS:** páginas renderizadas no servidor, sem framework de frontend.
+- **Chart.js (CDN):** gráfico de barras de entradas e saídas no painel.
 
 ## Uso de IA
 
@@ -48,6 +63,11 @@ O Codex apoiou a implementação dos relatórios, repositórios em memória,
 transações, serviço de estoque, endpoints HTTP e exportação CSV. Também foi
 utilizado para escrever testes de comportamento, executar verificações locais
 e documentar os contratos entre as camadas.
+
+O Claude Code apoiou o adaptador PostgreSQL com migrações e testes de
+integração, as páginas EJS (painel, lista, formulários e página do produto) e
+seus testes. As páginas foram conferidas em navegador, em largura de desktop e
+de celular, antes dos commits.
 
 As verificações executadas incluem lint, formatação, tipos, compilação, testes
 unitários, integração HTTP, cobertura e o teste de disponibilidade do Playwright.
@@ -66,8 +86,10 @@ npm run test:coverage
 ```
 
 `npm test` executa os testes de unidade em `tests/unit` e os testes HTTP em
-`tests/api` e `tests/http`. Os testes usam armazenamento em memória, configurado pelos scripts
-com `cross-env`. O CI está configurado para executar os testes e a cobertura em
+`tests/api` (API JSON e, em `tests/api/pages`, as páginas) e `tests/http`. Os
+testes usam armazenamento em memória, configurado pelos scripts com `cross-env`.
+Os testes de integração com PostgreSQL em `tests/postgres` só rodam com
+`TEST_DATABASE_URL` definida (veja [PostgreSQL](docs/fase-3.md#postgresql)). O CI está configurado para executar os testes e a cobertura em
 Windows, macOS e Linux.
 
 A cobertura deve atingir pelo menos 80% em linhas, funções, ramificações e
@@ -102,5 +124,6 @@ de integração das próximas etapas estão em [Fase 3](docs/fase-3.md).
 A composição dos serviços, os endpoints e os exemplos de requisições estão em
 [API e serviço de estoque](docs/api.md).
 
-Para concluir a entrega, faltam as páginas EJS, pelo menos cinco fluxos e2e de interface executados no CI, a publicação em
-produção, os nomes completos dos integrantes e o vídeo de apresentação.
+Para concluir a entrega, faltam pelo menos cinco fluxos e2e de interface
+executados no CI, a publicação em produção, os nomes completos dos integrantes e
+o vídeo de apresentação.
