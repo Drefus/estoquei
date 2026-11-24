@@ -139,6 +139,11 @@ export function productPages(inventory: InventoryService): Router {
 
   router.post('/produtos/:id/editar', (req, res) => submitProductForm(req, res, req.params.id));
 
+  router.post('/produtos/:id/desativar', async (req, res) => {
+    await inventory.deactivateProduct(req.params.id);
+    res.redirect(303, '/produtos?ok=desativado');
+  });
+
   router.get('/produtos/:id', async (req, res) => {
     const history = await inventory.getProductHistory(req.params.id);
     res.render('products/detail', {

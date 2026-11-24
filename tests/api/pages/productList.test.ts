@@ -96,3 +96,27 @@ describe('página de lista de produtos', () => {
     expect(response.text).toContain('&lt;script&gt;');
   });
 });
+
+describe('desativação pela lista de produtos', () => {
+  it('deve desativar o produto e voltar à lista com confirmação', async () => {
+    const { app, inventory } = createApiFixture();
+    const product = await inventory.createProduct(validProductData());
+
+    const post = await request(app).post(`/produtos/${product.id}/desativar`);
+    const page = await request(app).get(post.headers.location!);
+
+    expect(post.status).toBe(303);
+    expect(page.text).toContain('Produto desativado.');
+    expect(page.text).toContain('Inativo');
+    expect(page.text).not.toContain(`/produtos/${product.id}/desativar`);
+    expect((await inventory.listProducts())[0]!.active).toBe(false);
+  });
+
+  it('deve exibir 404 ao desativar produto inexistente', async () => {
+    const { app } = createApiFixture();
+
+    const response = await request(app).post('/produtos/nao-existe/desativar');
+
+    expect(response.status).toBe(404);
+  });
+});
