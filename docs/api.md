@@ -12,14 +12,16 @@ dois repositórios. Confirma o novo estado somente se toda a operação terminar
 sucesso. Uma fila serializa escritas concorrentes, inclusive tentativas de usar
 o mesmo SKU ou de retirar o mesmo saldo. As consultas veem o estado confirmado.
 
-As implementações PostgreSQL devem implementar `InventoryStore` e fornecer
-repositórios vinculados à transação em execução, com as restrições e a proteção
-de concorrência correspondentes no banco. Esse adaptador ainda está pendente.
+`PostgresInventoryStore` implementa o mesmo contrato. Cada escrita roda em uma
+transação dedicada, com repositórios vinculados a ela e um advisory lock que
+serializa as escritas, como a fila em memória (veja
+[PostgreSQL](fase-3.md#postgresql)).
 
 `createApp({ config, inventory })` permite injetar o serviço nos testes e na
 composição da aplicação. Sem serviço explícito, cria uma instância em memória
-por aplicativo. Solicitar `STORAGE=postgres` sem adaptador causa erro de
-inicialização, evitando usar memória silenciosamente.
+por aplicativo. `src/server.ts` injeta o serviço PostgreSQL quando
+`STORAGE=postgres`; chamar `createApp` com `STORAGE=postgres` sem serviço causa
+erro de inicialização, evitando usar memória silenciosamente.
 
 ## Endpoints
 
