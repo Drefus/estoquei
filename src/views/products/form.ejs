@@ -1,0 +1,52 @@
+<%- include('../partials/header', { title }) %>
+<%
+  const fields = [
+    { name: 'sku', label: 'SKU', hint: '3 a 20 caracteres: letras maiúsculas, números e hífen. Ex.: CAF-500', attrs: 'maxlength="20" autocapitalize="characters" required' },
+    { name: 'name', label: 'Nome', hint: 'Até 100 caracteres.', attrs: 'maxlength="100" required' },
+    { name: 'category', label: 'Categoria', hint: 'Opcional. Ex.: Mercearia', attrs: 'list="categorias"' },
+    { name: 'cost', label: 'Preço de custo (R$)', hint: 'Ex.: 19,90', attrs: 'inputmode="decimal" required' },
+    { name: 'minStock', label: 'Estoque mínimo', hint: 'Quantidade inteira a partir da qual o produto aparece como estoque baixo.', attrs: 'inputmode="numeric" required' },
+  ];
+  const testIds = { sku: 'product-sku', name: 'product-name', category: 'product-category', cost: 'product-cost', minStock: 'product-min-stock' };
+%>
+<div class="page-header">
+  <h1><%= title %></h1>
+  <a class="button button-secondary" href="<%= cancelUrl %>">Cancelar</a>
+</div>
+
+<% if (Object.keys(errors).length > 0) { %>
+  <div class="alert alert-error" role="alert" data-testid="form-errors">
+    Corrija os campos destacados para salvar o produto.
+  </div>
+<% } %>
+
+<form class="panel" method="post" action="<%= action %>" novalidate data-testid="product-form">
+  <div class="form-grid">
+    <% for (const field of fields) { const fieldErrors = errors[field.name] || []; const invalid = fieldErrors.length > 0; %>
+      <div class="field">
+        <label for="campo-<%= field.name %>"><%= field.label %></label>
+        <input
+          id="campo-<%= field.name %>"
+          name="<%= field.name %>"
+          type="text"
+          value="<%= values[field.name] %>"
+          data-testid="<%= testIds[field.name] %>"
+          aria-describedby="dica-<%= field.name %><%= invalid ? ` erro-${field.name}` : '' %>"
+          <%= invalid ? 'aria-invalid=true' : '' %>
+          <%- field.attrs %>
+        />
+        <span class="hint" id="dica-<%= field.name %>"><%= field.hint %></span>
+        <% if (invalid) { %>
+          <p class="field-error" id="erro-<%= field.name %>" data-testid="error-<%= field.name %>"><%= fieldErrors.join(' ') %></p>
+        <% } %>
+      </div>
+    <% } %>
+  </div>
+  <datalist id="categorias">
+    <% for (const category of categories) { %><option value="<%= category %>"></option><% } %>
+  </datalist>
+  <div class="form-actions">
+    <button type="submit" data-testid="save-button">Salvar</button>
+  </div>
+</form>
+<%- include('../partials/footer') %>

@@ -1,17 +1,46 @@
-import { Router } from 'express';
+import { Router, type Request, type Response } from 'express';
 import {
+  DuplicateSkuError,
   InactiveProductError,
   InsufficientStockError,
   InvalidMovementError,
 } from '../../domain/errors.js';
 import type { Movement } from '../../domain/movement.js';
-import type { Product } from '../../domain/product.js';
-import { movementDataFromForm, movementFormValues } from './forms.js';
+import {
+  validateProductFields,
+  type Product,
+  type ProductFieldIssues,
+} from '../../domain/product.js';
 import type { ProductFilters } from '../../repositories/productRepository.js';
 import type { InventoryService } from '../../services/inventoryService.js';
+import {
+  movementDataFromForm,
+  movementFormValues,
+  productDataFromForm,
+  productFormFromProduct,
+  productFormValues,
+  type ProductFormValues,
+} from './forms.js';
+
+/** Erros por campo do formulário (o preço aparece como "cost", em reais). */
+type FormErrors = Partial<Record<keyof ProductFormValues, string[]>>;
+
+function formErrors(issues: ProductFieldIssues): FormErrors {
+  const { costCents, ...rest } = issues;
+  // O domínio fala em centavos; no formulário o usuário digita reais.
+  return costCents
+    ? { ...rest, cost: ['Informe um preço maior ou igual a zero, por exemplo 19,90.'] }
+    : rest;
+}
 
 function queryText(value: unknown): string {
   return typeof value === 'string' ? value.trim() : '';
+}
+
+function categoriesOf(products: Product[]): string[] {
+  return [...new Set(products.map((product) => product.category).filter(Boolean))].sort(
+    (left, right) => left.localeCompare(right, 'pt-BR'),
+  );
 }
 
 function byName(left: Product, right: Product): number {
@@ -36,21 +65,80 @@ export function productPages(inventory: InventoryService): Router {
       inventory.listProducts(query),
       inventory.listProducts(),
     ]);
-    const categories = [...new Set(all.map((product) => product.category).filter(Boolean))].sort(
-      (left, right) => left.localeCompare(right, 'pt-BR'),
-    );
     res.render('products/list', {
       title: 'Produtos',
       nav: 'produtos',
       products: products.sort(byName),
-      categories,
+      categories: categoriesOf(all),
       filters,
       hasProducts: all.length > 0,
       notice: queryText(req.query.ok),
     });
   });
 
+  async function renderProductForm(
+    res: Response,
+    form: { mode: 'novo' | 'editar'; id?: string; values: ProductFormValues; errors?: FormErrors },
+    status = 200,
+  ): Promise<void> {
+    const editing = form.mode === 'editar' && form.id !== undefined;
+    const productUrl = editing ? `/produtos/${encodeURIComponent(form.id!)}` : '';
+    res.status(status).render('products/form', {
+      title: editing ? 'Editar produto' : 'Novo produto',
+      nav: editing ? 'produtos' : 'novo',
+      action: editing ? `${productUrl}/editar` : '/produtos',
+      cancelUrl: editing ? productUrl : '/produtos',
+      values: form.values,
+      errors: form.errors ?? {},
+      categories: categoriesOf(await inventory.listProducts()),
+    });
+  }
+
+  /** Valida o formulário, salva e redireciona; em caso de erro, reexibe o formulário. */
+  async function submitProductForm(req: Request, res: Response, id?: string): Promise<void> {
+    const values = productFormValues(req.body);
+    const data = productDataFromForm(values);
+    const mode = id === undefined ? 'novo' : 'editar';
+    const errors = formErrors(validateProductFields(data));
+    if (Object.keys(errors).length > 0) {
+      await renderProductForm(res, { mode, ...(id ? { id } : {}), values, errors }, 400);
+      return;
+    }
+    try {
+      const saved =
+        id === undefined
+          ? await inventory.createProduct(data)
+          : await inventory.updateProduct(id, data);
+      const notice = id === undefined ? 'cadastrado' : 'salvo';
+      res.redirect(303, `/produtos/${encodeURIComponent(saved.id)}?ok=${notice}`);
+    } catch (error) {
+      if (!(error instanceof DuplicateSkuError)) throw error;
+      const skuError = { sku: [`Já existe um produto com o SKU ${error.sku}.`] };
+      await renderProductForm(res, { mode, ...(id ? { id } : {}), values, errors: skuError }, 409);
+    }
+  }
+
+  router.get('/produtos/novo', async (_req, res) => {
+    await renderProductForm(res, {
+      mode: 'novo',
+      values: { sku: '', name: '', category: '', cost: '', minStock: '0' },
+    });
+  });
+
+  router.post('/produtos', (req, res) => submitProductForm(req, res));
+
   // Rotas com :id ficam por último para não capturar caminhos fixos como /produtos/novo.
+  router.get('/produtos/:id/editar', async (req, res) => {
+    const { product } = await inventory.getProductHistory(req.params.id);
+    await renderProductForm(res, {
+      mode: 'editar',
+      id: product.id,
+      values: productFormFromProduct(product),
+    });
+  });
+
+  router.post('/produtos/:id/editar', (req, res) => submitProductForm(req, res, req.params.id));
+
   router.get('/produtos/:id', async (req, res) => {
     const history = await inventory.getProductHistory(req.params.id);
     res.render('products/detail', {
