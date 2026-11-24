@@ -1,0 +1,23 @@
+<!doctype html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title><%= title %> · Prateleira</title>
+    <link rel="stylesheet" href="/styles.css" />
+  </head>
+  <body>
+    <a class="skip-link" href="#conteudo">Pular para o conteúdo</a>
+    <header class="topbar">
+      <div class="topbar-inner">
+        <a class="brand" href="/">Prateleira</a>
+        <nav aria-label="Principal">
+          <ul class="nav">
+            <li><a href="/" <%- locals.nav === 'painel' ? 'aria-current="page"' : '' %>>Painel</a></li>
+            <li><a href="/produtos" <%- locals.nav === 'produtos' ? 'aria-current="page"' : '' %>>Produtos</a></li>
+            <li><a href="/produtos/novo" <%- locals.nav === 'novo' ? 'aria-current="page"' : '' %>>Novo produto</a></li>
+          </ul>
+        </nav>
+      </div>
+    </header>
+    <main id="conteudo" class="container">
