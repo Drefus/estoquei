@@ -57,14 +57,25 @@ function minStockIssues(minStock: number): string[] {
     : ['Estoque mínimo deve ser um número inteiro maior ou igual a zero.'];
 }
 
+export type ProductFieldIssues = Partial<Record<keyof ProductData, string[]>>;
+
+/** Retorna os problemas agrupados pelo campo que os causou (sem chaves para campos válidos). */
+export function validateProductFields(data: ProductData): ProductFieldIssues {
+  const fields: ProductFieldIssues = {
+    sku: skuIssues(data.sku),
+    name: nameIssues(data.name),
+    costCents: costIssues(data.costCents),
+    minStock: minStockIssues(data.minStock),
+  };
+  for (const key of Object.keys(fields) as (keyof ProductData)[]) {
+    if (fields[key]?.length === 0) delete fields[key];
+  }
+  return fields;
+}
+
 /** Retorna a lista de problemas dos dados do produto (vazia quando válidos). */
 export function validateProductData(data: ProductData): string[] {
-  return [
-    ...skuIssues(data.sku),
-    ...nameIssues(data.name),
-    ...costIssues(data.costCents),
-    ...minStockIssues(data.minStock),
-  ];
+  return Object.values(validateProductFields(data)).flat();
 }
 
 /** Cria um produto ativo e com saldo zero, ou lança InvalidProductError. */

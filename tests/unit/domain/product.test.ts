@@ -1,6 +1,10 @@
 import { describe, expect, it } from 'vitest';
 import { InvalidProductError } from '../../../src/domain/errors.js';
-import { createProduct, validateProductData } from '../../../src/domain/product.js';
+import {
+  createProduct,
+  validateProductData,
+  validateProductFields,
+} from '../../../src/domain/product.js';
 import { FIXED_DATE, validProductData } from './builders.js';
 
 const meta = { id: 'prod-1', now: FIXED_DATE };
@@ -119,5 +123,19 @@ describe('validação combinada', () => {
     });
 
     expect(issues).toHaveLength(4);
+  });
+});
+
+describe('validateProductFields', () => {
+  it('deve retornar objeto vazio quando todos os campos são válidos', () => {
+    expect(validateProductFields(validProductData())).toEqual({});
+  });
+
+  it('deve associar cada problema ao campo que o causou', () => {
+    const issues = validateProductFields(validProductData({ sku: 'ab', costCents: -1 }));
+
+    expect(Object.keys(issues).sort()).toEqual(['costCents', 'sku']);
+    expect(issues.sku).toHaveLength(1);
+    expect(issues.costCents).toHaveLength(1);
   });
 });
