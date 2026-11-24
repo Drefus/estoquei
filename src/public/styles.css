@@ -193,6 +193,16 @@ h2 {
   overflow-x: auto;
 }
 
+/* Em telas estreitas a tabela rola horizontalmente em vez de quebrar SKUs e valores. */
+.table-wrap th,
+.table-wrap td {
+  white-space: nowrap;
+}
+
+.table-wrap .actions {
+  flex-wrap: nowrap;
+}
+
 table {
   width: 100%;
   border-collapse: collapse;
@@ -217,6 +227,7 @@ td.number,
 th.number {
   text-align: right;
   font-variant-numeric: tabular-nums;
+  white-space: nowrap;
 }
 
 tr.low-stock {
