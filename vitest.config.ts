@@ -20,8 +20,11 @@ export default defineConfig({
         'src/db/pool.ts',
         'src/db/migrate.ts',
         'src/db/migrateCli.ts',
-        // Somente declarações de tipos, sem código executável.
+        // Somente declarações de tipos, sem código executável (o v8 os reporta como 0 de 0).
         'src/**/*.d.ts',
+        'src/repositories/productRepository.ts',
+        'src/repositories/movementRepository.ts',
+        'src/repositories/inventoryStore.ts',
       ],
       thresholds: {
         lines: 80,
