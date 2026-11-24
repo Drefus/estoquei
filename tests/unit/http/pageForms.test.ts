@@ -25,9 +25,12 @@ describe('parseReaisToCents', () => {
     expect(parseReaisToCents('-1,50')).toBe(-150);
   });
 
-  it.each(['', 'abc', '1,999', '1,2,3'])('deve retornar NaN para o texto inválido "%s"', (input) => {
-    expect(parseReaisToCents(input)).toBeNaN();
-  });
+  it.each(['', 'abc', '1,999', '1,2,3'])(
+    'deve retornar NaN para o texto inválido "%s"',
+    (input) => {
+      expect(parseReaisToCents(input)).toBeNaN();
+    },
+  );
 });
 
 describe('centsToInput', () => {
