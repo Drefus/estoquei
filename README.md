@@ -45,6 +45,18 @@ npm run dev
 Acesse `http://localhost:3000`. A API JSON (`/api/products`, `/api/dashboard`
 e outros) está descrita na [documentação da API](docs/api.md).
 
+## Produção
+
+- **Sistema publicado:** <!-- PREENCHER: https://prateleira-xxxx.onrender.com -->
+  _link a preencher após o primeiro deploy no Render_
+
+> O serviço usa o plano gratuito do Render, que **hiberna** depois de cerca de
+> 15 minutos sem acesso. O primeiro acesso depois disso pode demorar perto de um
+> minuto. Os dados ficam no PostgreSQL do Neon e não se perdem na hibernação.
+
+O passo a passo do deploy (Neon, Render, dados de exemplo e roteiro de teste)
+está em [Deploy em produção](docs/deploy.md).
+
 ## Tecnologias
 
 - **Node.js e TypeScript:** execução no servidor e verificação estática dos tipos.
