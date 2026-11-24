@@ -18,7 +18,8 @@
     "test": "cross-env STORAGE=memory vitest run",
     "test:watch": "cross-env STORAGE=memory vitest",
     "test:coverage": "cross-env STORAGE=memory vitest run --coverage",
-    "test:e2e": "cross-env STORAGE=memory playwright test"
+    "test:e2e": "cross-env STORAGE=memory playwright test",
+    "db:migrate": "node dist/db/migrateCli.js"
   },
   "license": "MIT",
   "dependencies": {

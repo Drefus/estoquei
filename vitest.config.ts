@@ -9,7 +9,20 @@ export default defineConfig({
       reporter: ['text', 'html', 'lcov', 'json-summary'],
       reportsDirectory: 'coverage',
       include: ['src/**/*.ts'],
-      exclude: ['src/server.ts', 'src/**/*.d.ts'],
+      exclude: [
+        // Inicialização do processo: só lê o ambiente e chama createApp, que é testado.
+        'src/server.ts',
+        // Adaptadores PostgreSQL e executor de migrações dependem de um banco real.
+        // Os testes de unidade e o CI usam STORAGE=memory; esses arquivos são
+        // verificados pelos testes de integração em tests/postgres quando
+        // TEST_DATABASE_URL está definida.
+        'src/repositories/postgres/**',
+        'src/db/pool.ts',
+        'src/db/migrate.ts',
+        'src/db/migrateCli.ts',
+        // Somente declarações de tipos, sem código executável.
+        'src/**/*.d.ts',
+      ],
       thresholds: {
         lines: 80,
         functions: 80,
