@@ -96,6 +96,20 @@ A cobertura deve atingir pelo menos 80% em linhas, funções, ramificações e
 instruções. O relatório HTML fica em `coverage/index.html`, e o resumo em
 `coverage/coverage-summary.json`.
 
+### Onde ver a cobertura no CI
+
+O selo no topo deste README mostra o estado da última execução do
+[GitHub Actions](https://github.com/Drefus/estoquei/actions/workflows/ci.yml).
+Ao abrir uma execução:
+
+- a página **Summary** mostra a tabela "Cobertura de testes" com as quatro
+  métricas, gerada no job `ubuntu-latest`;
+- a seção **Artifacts** traz o artefato `coverage`, com o relatório HTML
+  completo (abra `index.html` depois de baixar).
+
+Se qualquer métrica ficar abaixo de 80%, o Vitest falha e a execução fica
+vermelha.
+
 Para verificar também estilo, tipos e compilação:
 
 ```sh
