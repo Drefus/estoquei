@@ -1,0 +1,94 @@
+<%- include('../partials/header', { title }) %>
+<div class="page-header">
+  <h1>Produtos</h1>
+  <a class="button" href="/produtos/novo" data-testid="new-product-link">Novo produto</a>
+</div>
+
+<% if (notice === 'desativado') { %>
+  <p class="alert alert-success" role="status" data-testid="success-message">Produto desativado.</p>
+<% } %>
+
+<form class="panel filters" method="get" action="/produtos" role="search" aria-label="Filtrar produtos">
+  <div class="field">
+    <label for="busca">Buscar por nome ou SKU</label>
+    <input id="busca" name="busca" type="search" value="<%= filters.busca %>" data-testid="search-input" />
+  </div>
+  <div class="field">
+    <label for="categoria">Categoria</label>
+    <select id="categoria" name="categoria" data-testid="category-filter">
+      <option value="">Todas</option>
+      <% for (const category of categories) { %>
+        <option value="<%= category %>" <%= category === filters.categoria ? 'selected' : '' %>><%= category %></option>
+      <% } %>
+    </select>
+  </div>
+  <label class="checkbox">
+    <input type="checkbox" name="estoqueBaixo" value="1" <%= filters.estoqueBaixo ? 'checked' : '' %> data-testid="low-stock-filter" />
+    Somente estoque baixo
+  </label>
+  <div class="actions">
+    <button type="submit" data-testid="filter-button">Filtrar</button>
+    <a class="button button-secondary" href="/produtos">Limpar</a>
+  </div>
+</form>
+
+<section class="panel" aria-labelledby="titulo-lista">
+  <h2 id="titulo-lista">
+    <%= products.length %> <%= products.length === 1 ? 'produto encontrado' : 'produtos encontrados' %>
+  </h2>
+  <% if (products.length === 0) { %>
+    <p class="empty-state" data-testid="empty-list">
+      <% if (hasProducts) { %>Nenhum produto corresponde aos filtros.<% } else { %>Nenhum produto cadastrado ainda. <a href="/produtos/novo">Cadastre o primeiro</a>.<% } %>
+    </p>
+  <% } else { %>
+    <div class="table-wrap">
+      <table data-testid="products-table">
+        <thead>
+          <tr>
+            <th scope="col">SKU</th>
+            <th scope="col">Nome</th>
+            <th scope="col">Categoria</th>
+            <th scope="col" class="number">Custo</th>
+            <th scope="col" class="number">Saldo</th>
+            <th scope="col" class="number">Mínimo</th>
+            <th scope="col">Situação</th>
+            <th scope="col">Ações</th>
+          </tr>
+        </thead>
+        <tbody>
+          <% for (const product of products) { const low = product.active && isLowStock(product); %>
+            <tr class="<%= low ? 'low-stock' : '' %> <%= product.active ? '' : 'inactive' %>" data-testid="product-row" data-sku="<%= product.sku %>">
+              <td><%= product.sku %></td>
+              <td><a href="/produtos/<%= encodeURIComponent(product.id) %>"><%= product.name %></a></td>
+              <td><%= product.category || '—' %></td>
+              <td class="number"><%= formatCents(product.costCents) %></td>
+              <td class="number"><%= product.quantity %></td>
+              <td class="number"><%= product.minStock %></td>
+              <td>
+                <% if (!product.active) { %>
+                  <span class="badge badge-muted">Inativo</span>
+                <% } else if (low) { %>
+                  <span class="badge badge-warning" data-testid="low-stock-badge">Estoque baixo</span>
+                <% } else { %>
+                  <span class="badge badge-in">Ativo</span>
+                <% } %>
+              </td>
+              <td>
+                <div class="actions">
+                  <a class="button button-small button-secondary" href="/produtos/<%= encodeURIComponent(product.id) %>/editar" aria-label="Editar <%= product.name %>">Editar</a>
+                  <% if (product.active) { %>
+                    <a class="button button-small" href="/produtos/<%= encodeURIComponent(product.id) %>#movimentar" aria-label="Movimentar <%= product.name %>">Movimentar</a>
+                    <form method="post" action="/produtos/<%= encodeURIComponent(product.id) %>/desativar">
+                      <button type="submit" class="button-small button-danger" aria-label="Desativar <%= product.name %>">Desativar</button>
+                    </form>
+                  <% } %>
+                </div>
+              </td>
+            </tr>
+          <% } %>
+        </tbody>
+      </table>
+    </div>
+  <% } %>
+</section>
+<%- include('../partials/footer') %>
