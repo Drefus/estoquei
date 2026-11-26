@@ -6,7 +6,8 @@ Controle de estoque simples desenvolvido para a disciplina de Engenharia de Soft
 
 ## Integrantes
 
-<!-- Preencher com nome e matrícula. -->
+Henrique Castro Caetano - 2023104941
+João Paulo Kroger - XXXXX
 
 ## Sobre o sistema
 
@@ -42,15 +43,17 @@ O servidor usa a porta 3000 por padrão. Consulte `GET /health`,
 
 ## Uso de IA
 
-O Codex apoiou a implementação dos relatórios, repositórios em memória,
-transações, serviço de estoque, endpoints HTTP e exportação CSV. Também foi
-utilizado para escrever testes de comportamento, executar verificações locais
-e documentar os contratos entre as camadas.
+A Inteligência Artificial foi utilizada como ferramenta de apoio em todas as etapas do desenvolvimento, desde o planejamento até a implementação, testes, revisão e deploy, sempre com validação dos integrantes do grupo antes de cada commit.
 
-As verificações executadas incluem lint, formatação, tipos, compilação, testes
-unitários, integração HTTP, cobertura e o teste de disponibilidade do Playwright.
-A revisão e a explicação das decisões de implementação cabem aos integrantes.
+**Ferramentas:** [Claude Code](https://claude.com/claude-code), utilizando o modelo **Claude Opus 5.5 (Anthropic)**, e **Codex**.
 
+- **Planejamento:** apoio na definição da arquitetura em camadas, da stack tecnológica e da divisão do trabalho em fases, incluindo domínio, repositórios, serviços, rotas, interface, testes e2e, cobertura e deploy.
+- **Codificação:** auxílio na implementação da aplicação, incluindo relatórios, repositórios em memória, transações, serviço de estoque, endpoints HTTP, exportação CSV e testes unitários, de integração e end-to-end, com commits pequenos seguindo o padrão Conventional Commits.
+- **Testes e validação:** utilização da IA para elaboração e execução de testes de comportamento, verificações locais e validação dos contratos entre as camadas. As verificações realizadas incluíram lint, formatação, typecheck, compilação, testes unitários, integração HTTP, cobertura e teste de disponibilidade do Playwright.
+- **Revisão:** apoio na revisão do código por meio de skills do Claude Code voltadas à análise de correção e simplificação, complementado por lint, typecheck, testes automatizados e verificação visual das páginas no navegador.
+- **CI e deploy:** auxílio na configuração do GitHub Actions, Codecov e Render, além do diagnóstico e correção de problemas de ambiente e integração, como a lentidão na instalação do Playwright no Windows, solucionada no commit [`de70cf0`](https://github.com/Drefus/shortfy/commit/de70cf0).
+
+Todo o conteúdo gerado pela IA foi revisado, compreendido e validado pelos integrantes do grupo. As decisões de escopo, arquitetura e design, bem como a responsabilidade pela implementação final, permaneceram sob responsabilidade do grupo.
 <!-- Complementar com as ferramentas utilizadas pelo outro integrante e suas contribuições. -->
 
 ## Execução dos testes
