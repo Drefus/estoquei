@@ -7,7 +7,7 @@ Controle de estoque simples desenvolvido para a disciplina de Engenharia de Soft
 ## Integrantes
 
 - Henrique Castro Caetano (matrícula 2023104941)
-- João Paulo Kroger (matrícula _xxxxxxxxxx_)
+- João Paulo Kroger Macedo Neves (matrícula 2023001573)
 
 ## Sobre o sistema
 
@@ -75,8 +75,7 @@ perdidos ao reiniciar o servidor.
 
 ## Produção
 
-- **Sistema publicado:** <!-- PREENCHER: https://prateleira-xxxx.onrender.com -->
-  _link a preencher após o primeiro deploy no Render_
+- **Sistema publicado:** [Acessar o Prateleira](https://prateleira-ujoy.onrender.com/).
 
 > O serviço usa o plano gratuito do Render, que **hiberna** depois de cerca de
 > 15 minutos sem acesso. O primeiro acesso depois disso pode demorar perto de um
@@ -84,6 +83,11 @@ perdidos ao reiniciar o servidor.
 
 O passo a passo do deploy (Neon, Render, dados de exemplo e roteiro de teste)
 está em [Deploy em produção](docs/deploy.md).
+
+## Vídeo de apresentação
+
+[Assistir à apresentação do Prateleira no YouTube](https://youtu.be/ol9ByYsRT-A)
+(4min51s): demonstração do sistema, tecnologias utilizadas, uso de IA e testes com cobertura e CI.
 
 ## Tecnologias
 
@@ -111,10 +115,9 @@ A Inteligência Artificial foi utilizada como ferramenta de apoio em todas as et
 - **Codificação:** auxílio na implementação da aplicação, incluindo relatórios, repositórios em memória, transações, serviço de estoque, endpoints HTTP, exportação CSV e testes unitários, de integração e end-to-end, com commits pequenos seguindo o padrão Conventional Commits.
 - **Testes e validação:** utilização da IA para elaboração e execução de testes de comportamento, verificações locais e validação dos contratos entre as camadas. As verificações realizadas incluíram lint, formatação, typecheck, compilação, testes unitários, integração HTTP, cobertura e teste de disponibilidade do Playwright.
 - **Revisão:** apoio na revisão do código por meio de skills do Claude Code voltadas à análise de correção e simplificação, complementado por lint, typecheck, testes automatizados e verificação visual das páginas no navegador.
-- **CI e deploy:** auxílio na configuração do GitHub Actions, Codecov e Render, além do diagnóstico e correção de problemas de ambiente e integração, como a lentidão na instalação do Playwright no Windows, solucionada no commit [`de70cf0`](https://github.com/Drefus/shortfy/commit/de70cf0).
+- **CI e deploy:** auxílio na configuração do GitHub Actions para executar testes e cobertura em Linux, macOS e Windows, e na preparação do deploy no Render com PostgreSQL no Neon. A cobertura é medida pelo Vitest com `@vitest/coverage-v8`, com limite mínimo de 80%, resumo na página da execução e relatório publicado como artefato no próprio GitHub Actions.
 
 Todo o conteúdo gerado pela IA foi revisado, compreendido e validado pelos integrantes do grupo. As decisões de escopo, arquitetura e design, bem como a responsabilidade pela implementação final, permaneceram sob responsabilidade do grupo.
-<!-- Complementar com as ferramentas utilizadas pelo outro integrante e suas contribuições. -->
 
 ## Execução dos testes
 
