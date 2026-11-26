@@ -6,10 +6,8 @@ Controle de estoque simples desenvolvido para a disciplina de Engenharia de Soft
 
 ## Integrantes
 
-<!-- PREENCHER: nome completo e matrícula de cada integrante. -->
-
-- _Nome completo do integrante 1_ (matrícula _xxxxxxxxxx_)
-- _Nome completo do integrante 2_ (matrícula _xxxxxxxxxx_)
+- Henrique Castro Caetano (matrícula 2023104941)
+- João Paulo Kroger (matrícula _xxxxxxxxxx_)
 
 ## Sobre o sistema
 
@@ -105,46 +103,18 @@ está em [Deploy em produção](docs/deploy.md).
 
 ## Uso de IA
 
-<!--
-PREENCHER: revisem e completem esta seção com as palavras de vocês.
-Sugestão de estrutura: ferramentas usadas, em quais fases, como revisaram e o que
-precisou ser corrigido. Exemplos concretos valem mais que descrições genéricas.
--->
+A Inteligência Artificial foi utilizada como ferramenta de apoio em todas as etapas do desenvolvimento, desde o planejamento até a implementação, testes, revisão e deploy, sempre com validação dos integrantes do grupo antes de cada commit.
 
-### Ferramentas
+**Ferramentas:** [Claude Code](https://claude.com/claude-code), utilizando o modelo **Claude Opus 5.5 (Anthropic)**, e **Codex**.
 
-| Ferramenta         | Quem usou   | Fases                                                                               |
-| ------------------ | ----------- | ----------------------------------------------------------------------------------- |
-| Codex              | _preencher_ | Relatórios, repositórios em memória, transações, serviço, API HTTP e exportação CSV |
-| Claude Code        | _preencher_ | Adaptador PostgreSQL, páginas EJS, testes e2e, CI de cobertura e e2e, deploy        |
-| _outra, se houver_ | _preencher_ | _preencher_                                                                         |
+- **Planejamento:** apoio na definição da arquitetura em camadas, da stack tecnológica e da divisão do trabalho em fases, incluindo domínio, repositórios, serviços, rotas, interface, testes e2e, cobertura e deploy.
+- **Codificação:** auxílio na implementação da aplicação, incluindo relatórios, repositórios em memória, transações, serviço de estoque, endpoints HTTP, exportação CSV e testes unitários, de integração e end-to-end, com commits pequenos seguindo o padrão Conventional Commits.
+- **Testes e validação:** utilização da IA para elaboração e execução de testes de comportamento, verificações locais e validação dos contratos entre as camadas. As verificações realizadas incluíram lint, formatação, typecheck, compilação, testes unitários, integração HTTP, cobertura e teste de disponibilidade do Playwright.
+- **Revisão:** apoio na revisão do código por meio de skills do Claude Code voltadas à análise de correção e simplificação, complementado por lint, typecheck, testes automatizados e verificação visual das páginas no navegador.
+- **CI e deploy:** auxílio na configuração do GitHub Actions, Codecov e Render, além do diagnóstico e correção de problemas de ambiente e integração, como a lentidão na instalação do Playwright no Windows, solucionada no commit [`de70cf0`](https://github.com/Drefus/shortfy/commit/de70cf0).
 
-### Como a IA foi usada
-
-O Codex apoiou a implementação dos relatórios, repositórios em memória,
-transações, serviço de estoque, endpoints HTTP e exportação CSV. Também foi
-utilizado para escrever testes de comportamento, executar verificações locais
-e documentar os contratos entre as camadas.
-
-O Claude Code apoiou o adaptador PostgreSQL com migrações e testes de
-integração, as páginas EJS (painel, lista, formulários e página do produto), os
-testes end to end, as etapas de cobertura e e2e no CI e a preparação do deploy.
-As páginas foram conferidas em navegador, em largura de desktop e de celular,
-antes dos commits.
-
-Em todas as fases, os prompts seguiram um contexto fixo (stack, arquitetura,
-regras de commit) e uma descrição da fase, e cada passo terminou com lint,
-testes e cobertura antes do commit.
-
-### Como revisamos o que foi gerado
-
-<!-- PREENCHER com exemplos reais. Itens que podem ajudar: -->
-
-- _Leitura de cada diff antes do commit: …_
-- _Testes executados localmente e no CI nos três sistemas: …_
-- _Exemplo de algo que a IA errou e foi corrigido: …_ (ex.: uma mensagem de erro
-  alterada quebrou um teste e foi corrigida no commit `c65ec07`)
-- _Decisões que tomamos e a IA apenas implementou: …_
+Todo o conteúdo gerado pela IA foi revisado, compreendido e validado pelos integrantes do grupo. As decisões de escopo, arquitetura e design, bem como a responsabilidade pela implementação final, permaneceram sob responsabilidade do grupo.
+<!-- Complementar com as ferramentas utilizadas pelo outro integrante e suas contribuições. -->
 
 ## Execução dos testes
 
